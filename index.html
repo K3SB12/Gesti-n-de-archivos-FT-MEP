@@ -329,7 +329,7 @@
         }
         
         // Configurar event listeners para el modal
-        document.addEventListener('DOMContentLoaded', function() {
+        //document.addEventListener('DOMContentLoaded', function() {
             console.log('🔄 Configurando modal...');
             
             const modal = document.getElementById('applyAllModal');
@@ -352,7 +352,26 @@
             
             console.log('✅ Modal configurado correctamente');
             // app.js maneja el dashboard automáticamente
-        });
+       // });// DESACTIVADO - app.js ya maneja la inicialización
+
+        // Configuración DIRECTA del modal (sin DOMContentLoaded)
+        console.log('🔄 Configurando modal...');
+        const modal = document.getElementById('applyAllModal');
+        if (modal) {
+            const closeBtn = modal.querySelector('.modal-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    closeModal('applyAllModal');
+                });
+            }
+            
+            const cancelBtn = modal.querySelector('.modal-cancel');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    closeModal('applyAllModal');
+                });
+            }
+        }
         
         // Hacer funciones disponibles globalmente
         window.closeModal = closeModal;
@@ -363,6 +382,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+
 
 
 
