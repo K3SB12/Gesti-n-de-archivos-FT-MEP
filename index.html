@@ -191,6 +191,54 @@
     </style>
 </head>
 <body>
+
+    <body>
+    <!-- === AGREGAR ESTO === -->
+    <!-- Header del Sistema -->
+    <header class="header-sistema">
+        <div class="container">
+            <div class="logo-header">
+                <h1><i class="fas fa-laptop-code"></i> Sistema FT-MEP</h1>
+                <p class="subtitulo-header">Formación Tecnológica - MEP Costa Rica</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <div class="container">
+            <div id="breadcrumb">
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-home"></i> Inicio
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <main class="container">
+        <div id="contenedorPrincipal">
+            <!-- Aquí se cargará el dashboard -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-sistema">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3><i class="fas fa-laptop-code"></i> FT-MEP</h3>
+                    <p>Sistema de Gestión Académica<br>Formación Tecnológica</p>
+                </div>
+                <div class="footer-info">
+                    <p><i class="fas fa-info-circle"></i> Sistema v1.0 - PNFT MEP Costa Rica</p>
+                    <p><i class="fas fa-calendar"></i> 2024 - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- === FIN DE LO QUE AGREGAR === -->
+        
     <!-- Sistema de Respaldo (oculto) -->
     <div id="backupSystem" style="display: none;">
         <div id="backupStatus"></div>
@@ -640,7 +688,7 @@
     <!-- ============================================= -->
     <!-- CÓDIGO DE INICIALIZACIÓN MEJORADO -->
     <!-- ============================================= -->
-    <script>
+   <script>
         // Función para manejar el cierre de modales
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
@@ -658,76 +706,140 @@
             }
         }
         
+        // FUNCIONES DEL DASHBOARD
+        function volverDashboard() {
+            console.log('Volviendo al dashboard');
+            mostrarDashboard();
+        }
+        
+        function cargarNivel(nivelId) {
+            console.log('Cargando nivel:', nivelId);
+            // Por ahora solo muestra un mensaje
+            const nombres = {
+                'primaria-ciclo-I': 'I Ciclo (1°-3°)',
+                'primaria-ciclo-II': 'II Ciclo (4°-6°)',
+                'secundaria-ciclo-III': 'III Ciclo (7°-9°)'
+            };
+            
+            const contenedor = document.getElementById('contenedorPrincipal');
+            if (contenedor) {
+                contenedor.innerHTML = `
+                    <div class="nivel-vista">
+                        <div class="nivel-header">
+                            <button class="btn-volver" onclick="volverDashboard()">
+                                <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                            </button>
+                            <h2><i class="fas fa-folder-open"></i> ${nombres[nivelId] || nivelId}</h2>
+                        </div>
+                        <div class="nivel-contenido">
+                            <p>Esta es la vista del nivel <strong>${nombres[nivelId] || nivelId}</strong>.</p>
+                            <p>Los módulos se cargarán desde: <code>modulos-ft/${obtenerRutaNivel(nivelId)}/</code></p>
+                            <button class="btn btn-primary" onclick="crearModuloEjemplo('${nivelId}')">
+                                <i class="fas fa-plus"></i> Crear Módulo de Ejemplo
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function obtenerRutaNivel(nivelId) {
+            const rutas = {
+                'primaria-ciclo-I': 'primaria/ciclo-I',
+                'primaria-ciclo-II': 'primaria/ciclo-II',
+                'secundaria-ciclo-III': 'secundaria/ciclo-III'
+            };
+            return rutas[nivelId] || nivelId;
+        }
+        
+        function crearModuloEjemplo(nivelId) {
+            alert(`Creando módulo de ejemplo para: ${nivelId}`);
+        }
+        
+        function mostrarDashboard() {
+            const contenedor = document.getElementById('contenedorPrincipal');
+            if (!contenedor) return;
+            
+            contenedor.innerHTML = `
+                <div class="dashboard">
+                    <div class="dashboard-header">
+                        <h2><i class="fas fa-tachometer-alt"></i> Panel de Control FT-MEP</h2>
+                        <p>Gestión académica para Formación Tecnológica - MEP Costa Rica</p>
+                    </div>
+                    
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>5</h3>
+                                <p>Estudiantes</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>12</h3>
+                                <p>Módulos</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>85%</h3>
+                                <p>Promedio</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="seccion-dashboard">
+                        <h3><i class="fas fa-graduation-cap"></i> Acceso Rápido a Niveles</h3>
+                        <div class="acceso-rapido">
+                            <button class="btn-nivel" onclick="cargarNivel('primaria-ciclo-I')">
+                                <i class="fas fa-child"></i> I Ciclo
+                            </button>
+                            <button class="btn-nivel" onclick="cargarNivel('primaria-ciclo-II')">
+                                <i class="fas fa-user-graduate"></i> II Ciclo
+                            </button>
+                            <button class="btn-nivel" onclick="cargarNivel('secundaria-ciclo-III')">
+                                <i class="fas fa-graduation-cap"></i> III Ciclo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function activarAsistenteIA() {
+            alert('🤖 Asistente IA activado');
+        }
+        
         // Inicializar sistema al cargar
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Sistema FT-MEP inicializando...');
             
-            // Configurar event listeners para el modal
+            // Mostrar dashboard por defecto
+            mostrarDashboard();
+            
+            // Configurar event listeners para el modal (tu código existente)
             const modal = document.getElementById('applyAllModal');
             if (modal) {
-                // Cerrar con la X
+                // ... tu código existente del modal ...
                 const closeBtn = modal.querySelector('.modal-close');
                 if (closeBtn) {
                     closeBtn.addEventListener('click', function() {
                         closeModal('applyAllModal');
                     });
                 }
-                
-                // Cerrar con botón Cancelar
-                const cancelBtn = modal.querySelector('.modal-cancel');
-                if (cancelBtn) {
-                    cancelBtn.addEventListener('click', function() {
-                        closeModal('applyAllModal');
-                    });
-                }
-                
-                // Cerrar al hacer clic fuera del modal
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        closeModal('applyAllModal');
-                    }
-                });
-                
-                // Cerrar con tecla Escape
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && modal.classList.contains('active')) {
-                        closeModal('applyAllModal');
-                    }
-                });
-                
-                // Configurar botón "Aplicar a Todo el Grupo"
-                const confirmBtn = document.getElementById('modalConfirmBtn');
-                if (confirmBtn) {
-                    confirmBtn.addEventListener('click', function() {
-                        alert('Aplicando calificación a todo el grupo...');
-                        closeModal('applyAllModal');
-                    });
-                }
-                
-                // Configurar botón "Solo este Estudiante"
-                const studentBtn = document.getElementById('modalThisStudentBtn');
-                if (studentBtn) {
-                    studentBtn.addEventListener('click', function() {
-                        alert('Aplicando calificación solo a este estudiante...');
-                        closeModal('applyAllModal');
-                    });
-                }
+                // ... resto de tu código del modal ...
             }
-            
-            // Botones de prueba para abrir el modal
-            document.querySelectorAll('.grade-badge').forEach(badge => {
-                badge.addEventListener('click', function() {
-                    const level = this.getAttribute('data-level');
-                    const levelText = level === '3' ? 'Alto (3)' : level === '2' ? 'Medio (2)' : 'Bajo (1)';
-                    
-                    // Actualizar contenido del modal
-                    document.getElementById('modalLevel').textContent = levelText;
-                    document.getElementById('modalCount').textContent = '10'; // Ejemplo
-                    
-                    // Abrir modal
-                    openModal('applyAllModal');
-                });
-            });
             
             // Inicializar sistema de respaldo
             if(typeof BackupManager !== 'undefined') {
@@ -741,18 +853,14 @@
                 document.getElementById('aiStatusText').textContent = 'ACTIVO';
             }
             
-            // Mostrar mensaje de bienvenida
-            setTimeout(() => {
-                console.log('✅ Sistema FT-MEP listo');
-                console.log('🔧 Modal "Aplicar a todo el grupo" configurado correctamente');
-                console.log('📋 Para probar: Haz clic en "Alto (3)", "Medio (2)" o "Bajo (1)" en la sección de calificación');
-            }, 500);
+            console.log('✅ Sistema FT-MEP listo');
         });
         
-        // Función auxiliar para mostrar notificaciones
-        function showNotification(title, message, type) {
-            console.log(`${type.toUpperCase()}: ${title} - ${message}`);
-        }
+        // Hacer funciones disponibles globalmente
+        window.volverDashboard = volverDashboard;
+        window.cargarNivel = cargarNivel;
+        window.activarAsistenteIA = activarAsistenteIA;
+        window.mostrarDashboard = mostrarDashboard;
     </script>
 </body>
 </html>
