@@ -192,8 +192,6 @@
 </head>
 <body>
 
-    <body>
-    <!-- === AGREGAR ESTO === -->
     <!-- Header del Sistema -->
     <header class="header-sistema">
         <div class="container">
@@ -201,6 +199,27 @@
                 <h1><i class="fas fa-laptop-code"></i> Sistema FT-MEP</h1>
                 <p class="subtitulo-header">Formación Tecnológica - MEP Costa Rica</p>
             </div>
+            
+            <!-- AGREGAR ESTA NAVEGACIÓN -->
+            <nav class="nav-principal">
+                <a href="#" onclick="volverDashboard()" class="nav-link active">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a href="#" onclick="cargarNivel('primaria-ciclo-I')" class="nav-link">
+                    <i class="fas fa-child"></i> I Ciclo
+                </a>
+                <a href="#" onclick="cargarNivel('primaria-ciclo-II')" class="nav-link">
+                    <i class="fas fa-user-graduate"></i> II Ciclo
+                </a>
+                <a href="#" onclick="cargarNivel('secundaria-ciclo-III')" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i> III Ciclo
+                </a>
+                <div class="nav-actions">
+                    <button class="btn btn-sm btn-primary" onclick="activarAsistenteIA()">
+                        <i class="fas fa-robot"></i> Asistente IA
+                    </button>
+                </div>
+            </nav>
         </div>
     </header>
 
@@ -238,404 +257,7 @@
         </div>
     </footer>
     <!-- === FIN DE LO QUE AGREGAR === -->
-        
-    <!-- Sistema de Respaldo (oculto) -->
-    <div id="backupSystem" style="display: none;">
-        <div id="backupStatus"></div>
-        <input type="file" id="restoreFile" accept=".json" style="display: none;">
-        <a id="backupDownload" download style="display: none;"></a>
-    </div>
-
-    <div class="container">
-        <!-- Header Principal -->
-        <header class="header">
-            <div class="logo-container">
-                <div class="logo">
-                    <i class="fas fa-laptop-code"></i>
-                    <div class="logo-text">
-                        <h1>FT-MEP <span class="version">v2.0</span></h1>
-                        <p class="subtitle">Formación Tecnológica - Sistema de Gestión Académica</p>
-                    </div>
-                </div>
-                <div class="mep-badge">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Coat_of_arms_of_Costa_Rica.svg/40px-Coat_of_arms_of_Costa_Rica.svg.png" alt="Escudo Costa Rica">
-                    <span>MINISTERIO DE EDUCACIÓN PÚBLICA</span>
-                </div>
-            </div>
-
-            <div class="header-controls">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Buscar estudiante, módulo o indicador (Ctrl+K)" id="searchInput">
-                    <div class="shortcut-hint">Ctrl+K</div>
-                </div>
-                
-                <div class="user-actions">
-                    <button class="btn-icon" id="backupBtn" title="Generar respaldo">
-                        <i class="fas fa-database"></i>
-                        <span class="btn-badge" id="backupIndicator">✓</span>
-                    </button>
-                    <button class="btn-icon" id="exportBtn" title="Exportar reportes">
-                        <i class="fas fa-file-export"></i>
-                    </button>
-                    <div class="user-profile">
-                        <div class="avatar">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="user-info">
-                            <span class="user-name">Docente FT</span>
-                            <span class="user-role">Formación Tecnológica</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Barra de Estado del Sistema -->
-        <div class="system-status-bar">
-            <div class="status-item">
-                <i class="fas fa-shield-alt"></i>
-                <span>Sistema de Respaldo: <strong id="backupStatusText">ACTIVO</strong></span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-brain"></i>
-                <span>Asistente IA: <strong id="aiStatusText">LISTO</strong></span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-sync-alt"></i>
-                <span>Última sincronización: <strong id="lastSync">Hace 2 min</strong></span>
-            </div>
-            <button class="btn-small" id="quickBackup">
-                <i class="fas fa-save"></i> Respaldar Ahora
-            </button>
-        </div>
-
-        <div class="main-layout">
-            <!-- Navegación Lateral -->
-            <nav class="sidebar">
-                <!-- Selector de Ciclo -->
-                <div class="cycle-selector card">
-                    <h3><i class="fas fa-graduation-cap"></i> CICLO ACTUAL</h3>
-                    <div class="cycle-options">
-                        <button class="cycle-btn active" data-cycle="III">
-                            <span class="cycle-icon">III</span>
-                            <span class="cycle-label">III Ciclo</span>
-                            <span class="cycle-desc">7°-9°</span>
-                        </button>
-                        <button class="cycle-btn" data-cycle="II">
-                            <span class="cycle-icon">II</span>
-                            <span class="cycle-label">II Ciclo</span>
-                            <span class="cycle-desc">4°-6°</span>
-                        </button>
-                        <button class="cycle-btn" data-cycle="I">
-                            <span class="cycle-icon">I</span>
-                            <span class="cycle-label">I Ciclo</span>
-                            <span class="cycle-desc">1°-3°</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Módulos FT -->
-                <div class="modules-nav card">
-                    <h3><i class="fas fa-cubes"></i> MÓDULOS FT</h3>
-                    <div class="modules-list">
-                        <a href="#" class="module-item active" data-module="ofimatica">
-                            <i class="fas fa-file-excel"></i>
-                            <span>Ofimática</span>
-                            <span class="module-badge">65%</span>
-                        </a>
-                        <a href="#" class="module-item" data-module="diseno_web">
-                            <i class="fas fa-code"></i>
-                            <span>Diseño Web</span>
-                            <span class="module-badge">80%</span>
-                        </a>
-                        <a href="#" class="module-item" data-module="programacion">
-                            <i class="fas fa-laptop-code"></i>
-                            <span>Programación</span>
-                            <span class="module-badge">45%</span>
-                        </a>
-                        <a href="#" class="module-item" data-module="robotica">
-                            <i class="fas fa-robot"></i>
-                            <span>Robótica</span>
-                            <span class="module-badge">30%</span>
-                        </a>
-                        <a href="#" class="module-item" data-module="digital">
-                            <i class="fas fa-globe"></i>
-                            <span>Educación Digital</span>
-                            <span class="module-badge">90%</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Contexto Actual -->
-                <div class="context-card card">
-                    <h3><i class="fas fa-info-circle"></i> CONTEXTO</h3>
-                    <div class="context-info">
-                        <div class="info-row">
-                            <i class="fas fa-school"></i>
-                            <div>
-                                <small>Institución</small>
-                                <strong id="currentInstitution">Liceo Experimental</strong>
-                            </div>
-                        </div>
-                        <div class="info-row">
-                            <i class="fas fa-users"></i>
-                            <div>
-                                <small>Grupo</small>
-                                <strong id="currentGroup">9°A - III Ciclo</strong>
-                            </div>
-                        </div>
-                        <div class="info-row">
-                            <i class="fas fa-calendar-alt"></i>
-                            <div>
-                                <small>Período</small>
-                                <strong id="currentPeriod">II Periodo 2025</strong>
-                            </div>
-                        </div>
-                        <div class="info-row">
-                            <i class="fas fa-percentage"></i>
-                            <div>
-                                <small>Distribución</small>
-                                <strong id="currentDistribution">TC:50% T:10% P:30% A:10%</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Acciones Rápidas -->
-                <div class="quick-actions card">
-                    <h3><i class="fas fa-bolt"></i> ACCIONES RÁPIDAS</h3>
-                    <button class="btn-quick" id="btnGenerarRubricas">
-                        <i class="fas fa-magic"></i> Generar Rúbricas IA
-                    </button>
-                    <button class="btn-quick" id="btnAnalizarRiesgo">
-                        <i class="fas fa-chart-line"></i> Análisis de Riesgo
-                    </button>
-                    <button class="btn-quick" id="btnReportePeriodo">
-                        <i class="fas fa-file-pdf"></i> Reporte Período
-                    </button>
-                    <button class="btn-quick" id="btnSugerirActividades">
-                        <i class="fas fa-lightbulb"></i> Sugerir Actividades
-                    </button>
-                </div>
-            </nav>
-
-            <!-- Contenido Principal -->
-            <main class="content">
-                <!-- Barra de Herramientas -->
-                <div class="toolbar">
-                    <div class="breadcrumb">
-                        <span>Formación Tecnológica</span>
-                        <i class="fas fa-chevron-right"></i>
-                        <span id="currentModule">Ofimática</span>
-                        <i class="fas fa-chevron-right"></i>
-                        <span id="currentAction">Registro de Calificaciones</span>
-                    </div>
-                    
-                    <div class="toolbar-actions">
-                        <div class="view-toggle">
-                            <button class="btn-view active" data-view="grading">
-                                <i class="fas fa-clipboard-check"></i> Calificación
-                            </button>
-                            <button class="btn-view" data-view="reports">
-                                <i class="fas fa-chart-bar"></i> Reportes
-                            </button>
-                            <button class="btn-view" data-view="planning">
-                                <i class="fas fa-calendar-check"></i> Planeamiento
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Área de Trabajo Principal -->
-                <div class="work-area" id="workArea">
-                    <!-- Vista de Calificación (por defecto) -->
-                    <div class="view-content active" id="viewGrading">
-                        <div class="grading-header">
-                            <h2><i class="fas fa-clipboard-list"></i> Registro de Calificación - Trabajo Cotidiano</h2>
-                            <div class="grading-controls">
-                                <div class="month-selector">
-                                    <label for="monthSelect"><i class="fas fa-calendar-alt"></i> Mes:</label>
-                                    <select id="monthSelect" class="select-custom">
-                                        <option value="">Seleccionar mes...</option>
-                                        <option value="febrero">Febrero</option>
-                                        <option value="marzo">Marzo</option>
-                                        <option value="abril">Abril</option>
-                                        <option value="mayo">Mayo</option>
-                                        <option value="junio">Junio</option>
-                                        <option value="julio">Julio</option>
-                                        <option value="agosto">Agosto</option>
-                                        <option value="setiembre">Setiembre</option>
-                                        <option value="octubre">Octubre</option>
-                                        <option value="noviembre">Noviembre</option>
-                                        <option value="diciembre">Diciembre</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="student-selector">
-                                    <label for="studentSelect"><i class="fas fa-user-graduate"></i> Estudiante:</label>
-                                    <select id="studentSelect" class="select-custom">
-                                        <option value="">Seleccionar estudiante...</option>
-                                        <!-- Se llena dinámicamente -->
-                                    </select>
-                                </div>
-                                
-                                <div class="quick-grade">
-                                    <span>Aplicar a todos:</span>
-                                    <button class="grade-badge high" data-level="3">Alto (3)</button>
-                                    <button class="grade-badge medium" data-level="2">Medio (2)</button>
-                                    <button class="grade-badge low" data-level="1">Bajo (1)</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Panel de Calificación Dinámico -->
-                        <div class="grading-container">
-                            <div class="student-info-card">
-                                <div class="student-header">
-                                    <div class="student-avatar">
-                                        <i class="fas fa-user-graduate"></i>
-                                    </div>
-                                    <div class="student-details">
-                                        <h3 id="currentStudentName">Seleccione un estudiante</h3>
-                                        <div class="student-meta">
-                                            <span class="meta-item" id="studentCode">Código: ---</span>
-                                            <span class="meta-item" id="studentAverage">Promedio: --.--</span>
-                                            <span class="meta-item" id="studentRisk">Riesgo: --</span>
-                                        </div>
-                                    </div>
-                                    <div class="student-stats">
-                                        <div class="stat-box">
-                                            <small>Trabajo Cotidiano</small>
-                                            <strong id="statTC">0%</strong>
-                                        </div>
-                                        <div class="stat-box">
-                                            <small>Proyecto</small>
-                                            <strong id="statProyecto">0%</strong>
-                                        </div>
-                                        <div class="stat-box">
-                                            <small>Asistencia</small>
-                                            <strong id="statAsistencia">0%</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Indicadores de Evaluación -->
-                            <div class="indicators-container" id="indicatorsContainer">
-                                <div class="empty-state">
-                                    <i class="fas fa-clipboard-list fa-3x"></i>
-                                    <h3>No hay indicadores cargados</h3>
-                                    <p>Seleccione un ciclo y módulo para cargar los indicadores de Formación Tecnológica</p>
-                                    <button class="btn-primary" id="btnCargarIndicadores">
-                                        <i class="fas fa-upload"></i> Cargar Indicadores
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Resumen de Calificación -->
-                            <div class="grading-summary">
-                                <div class="summary-header">
-                                    <h4><i class="fas fa-calculator"></i> Resumen de Calificación</h4>
-                                    <div class="summary-stats">
-                                        <span id="gradedCount">0 de 0 indicadores calificados</span>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" id="gradingProgress" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="summary-actions">
-                                    <button class="btn-secondary" id="btnLimpiarMes">
-                                        <i class="fas fa-broom"></i> Limpiar Mes
-                                    </button>
-                                    <button class="btn-success" id="btnGuardarCalificacion">
-                                        <i class="fas fa-save"></i> Guardar Calificación
-                                    </button>
-                                    <button class="btn-primary" id="btnCalcularNota">
-                                        <i class="fas fa-calculator"></i> Calcular Nota Final
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Vista de Reportes -->
-                    <div class="view-content" id="viewReports">
-                        <div class="reports-header">
-                            <h2><i class="fas fa-chart-bar"></i> Reportes y Análisis</h2>
-                            <div class="report-filters">
-                                <select class="select-custom">
-                                    <option>Tipo de Reporte</option>
-                                    <option>Individual por Estudiante</option>
-                                    <option>Grupo Completo</option>
-                                    <option>Análisis Comparativo</option>
-                                </select>
-                                <button class="btn-primary">
-                                    <i class="fas fa-file-pdf"></i> Generar PDF
-                                </button>
-                            </div>
-                        </div>
-                        <!-- Contenido de reportes se cargará dinámicamente -->
-                    </div>
-
-                    <!-- Vista de Planeamiento -->
-                    <div class="view-content" id="viewPlanning">
-                        <div class="planning-header">
-                            <h2><i class="fas fa-calendar-check"></i> Planeamiento Didáctico</h2>
-                            <button class="btn-primary">
-                                <i class="fas fa-robot"></i> Generar con IA
-                            </button>
-                        </div>
-                        <!-- Contenido de planeamiento se cargará dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Panel de IA Asistente -->
-                <div class="ai-panel" id="aiPanel">
-                    <div class="ai-header">
-                        <h3><i class="fas fa-robot"></i> Asistente IA FT</h3>
-                        <button class="btn-icon" id="closeAiPanel">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="ai-content">
-                        <div class="ai-suggestions" id="aiSuggestions">
-                            <!-- Sugerencias de IA se cargarán aquí -->
-                        </div>
-                        <div class="ai-input">
-                            <input type="text" placeholder="Preguntar al asistente IA..." id="aiInput">
-                            <button class="btn-icon">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-laptop-code"></i>
-                    <span>Sistema de Formación Tecnológica MEP</span>
-                </div>
-                <div class="footer-info">
-                    <span>© 2025 Ministerio de Educación Pública - Costa Rica</span>
-                    <span class="divider">|</span>
-                    <span>Compatibilidad Total con Lineamientos 2024</span>
-                    <span class="divider">|</span>
-                    <span id="dataStatus">Datos protegidos: Respaldos automáticos activos</span>
-                </div>
-                <div class="footer-stats">
-                    <span class="stat"><i class="fas fa-database"></i> <span id="storageUsed">0.2 MB</span></span>
-                    <span class="stat"><i class="fas fa-shield-alt"></i> <span id="backupCount">3 respaldos</span></span>
-                </div>
-            </div>
-        </footer>
-    </div>
-
+    
     <!-- ============================================= -->
     <!-- MODAL PARA "APLICAR A TODO EL GRUPO" - VERSIÓN CORREGIDA -->
     <!-- ============================================= -->
@@ -820,6 +442,17 @@
         function activarAsistenteIA() {
             alert('🤖 Asistente IA activado');
         }
+        function gestionarEstudiantes() {
+            alert('📋 Gestión de Estudiantes\n\n• Agregar nuevos estudiantes\n• Editar información\n• Asignar a grupos');
+        }
+        
+        function generarReportes() {
+            alert('📄 Generar Reportes\n\n• Boletas de calificaciones\n• Certificados\n• Estadísticas');
+        }
+        
+        function calcularNotas() {
+            alert('🧮 Calcular Notas\n\nUsando distribución MEP:\n• 40% Trabajos prácticos\n• 30% Proyecto final\n• 20% Evaluaciones\n• 10% Participación');
+        }
         
         // Inicializar sistema al cargar
         document.addEventListener('DOMContentLoaded', function() {
@@ -861,6 +494,10 @@
         window.cargarNivel = cargarNivel;
         window.activarAsistenteIA = activarAsistenteIA;
         window.mostrarDashboard = mostrarDashboard;
+        window.gestionarEstudiantes = gestionarEstudiantes;
+        window.generarReportes = generarReportes;
+        window.calcularNotas = calcularNotas;
     </script>
 </body>
 </html>
+
