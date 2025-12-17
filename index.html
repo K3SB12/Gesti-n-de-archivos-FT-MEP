@@ -458,8 +458,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Sistema FT-MEP inicializando...');
             
-            // Mostrar dashboard por defecto
-            mostrarDashboard();
+            // ¡ESTA ES LA CLAVE! Usar la función profesional de app.js:
+            if (typeof window.mostrarDashboard === 'function') {
+                window.mostrarDashboard(); // Llama a la función de app.js
+            } else {
+                // Si por algún motivo no está disponible, muestra el básico
+                console.warn('Usando dashboard básico');
+                // Aquí iría tu función simple actual
+            }
             
             // Configurar event listeners para el modal (tu código existente)
             const modal = document.getElementById('applyAllModal');
@@ -500,5 +506,6 @@
     </script>
 </body>
 </html>
+
 
 
