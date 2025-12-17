@@ -1,0 +1,1614 @@
+// ==============================================
+// SISTEMA DE RESPALDO ROBUSTO - FT-MEP
+// Versión corregida y optimizada
+// ==============================================
+
+class BackupManager {
+    constructor() {
+        this.config = {
+            backupInterval: 30 * 60 * 1000, // 30 minutos
+            maxBackups: 10,
+            autoBackup: true,
+            backupTypes: ['localStorage', 'indexedDB', 'file']
+        };
+        
+        this.dbName = 'ft_mep_backup';
+        this.dbVersion = 1;
+        this.db = null;
+        this.isInitialized = false;
+        
+        this.init();
+    }
+    
+    async init() {
+        console.log('💾 Inicializando sistema de respaldo...');
+        
+        try {
+            // 1. Inicializar IndexedDB
+            await this.initIndexedDB();
+            
+            // 2. Verificar datos existentes
+            await this.verificarIntegridadDatos();
+            
+            // 3. Configurar respaldo automático
+            if (this.config.autoBackup) {
+                this.configurarRespaldoAutomatico();
+            }
+            
+            // 4. Actualizar UI
+            this.actualizarUIEstado();
+            
+            this.isInitialized = true;
+            console.log('✅ Sistema de respaldo inicializado');
+            
+        } catch (error) {
+            console.error('❌ Error inicializando sistema de respaldo:', error);
+            this.mostrarError('Sistema de respaldo no disponible');
+        }
+    }
+    
+    async initIndexedDB() {
+        return new Promise((resolve, reject) => {
+            // Verificar si IndexedDB está disponible
+            if (!window.indexedDB) {
+                console.warn('⚠️ IndexedDB no está disponible en este navegador');
+                this.mostrarError('IndexedDB no disponible - Usando localStorage solo');
+                resolve();
+                return;
+            }
+            
+            const request = indexedDB.open(this.dbName, this.dbVersion);
+            
+            request.onerror = (event) => {
+                console.error('❌ Error abriendo IndexedDB:', event.target.error);
+                // Continuar sin IndexedDB pero con advertencia
+                this.mostrarError('IndexedDB no disponible - Usando localStorage solo');
+                resolve();
+            };
+            
+            request.onsuccess = (event) => {
+                this.db = event.target.result;
+                
+                // Manejar errores de base de datos
+                this.db.onerror = (event) => {
+                    console.error('❌ Error en IndexedDB:', event.target.error);
+                };
+                
+                console.log('✅ IndexedDB conectado');
+                resolve();
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                console.log('🔄 Creando/actualizando base de datos...');
+                
+                // Crear almacén para respaldos
+                if (!db.objectStoreNames.contains('backups')) {
+                    const store = db.createObjectStore('backups', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('timestamp', 'timestamp', { unique: false });
+                    store.createIndex('type', 'type', { unique: false });
+                    console.log('📁 Almacén "backups" creado');
+                }
+                
+                // Crear almacén para datos de estudiantes
+                if (!db.objectStoreNames.contains('estudiantes')) {
+                    db.createObjectStore('estudiantes', { keyPath: 'id' });
+                    console.log('📁 Almacén "estudiantes" creado');
+                }
+                
+                // Crear almacén para calificaciones
+                if (!db.objectStoreNames.contains('calificaciones')) {
+                    const store = db.createObjectStore('calificaciones', { keyPath: ['estudianteId', 'mes'] });
+                    store.createIndex('estudianteId', 'estudianteId', { unique: false });
+                    store.createIndex('mes', 'mes', { unique: false });
+                    console.log('📁 Almacén "calificaciones" creado');
+                }
+                
+                console.log(`✅ IndexedDB actualizado a versión ${this.dbVersion}`);
+            };
+            
+            request.onblocked = () => {
+                console.warn('⚠️ IndexedDB está bloqueada por otra pestaña');
+                reject(new Error('IndexedDB bloqueada'));
+            };
+        });
+    }
+    
+    async verificarIntegridadDatos() {
+        console.log('🔍 Verificando integridad de datos...');
+        
+        try {
+            // Verificar localStorage
+            const totalItems = localStorage.length;
+            console.log(`📦 localStorage: ${totalItems} items`);
+            
+            if (totalItems === 0) {
+                console.warn('⚠️ localStorage está vacío');
+                await this.crearDatosIniciales();
+            }
+            
+            // Verificar IndexedDB si está disponible
+            let backupCount = 0;
+            if (this.db) {
+                backupCount = await this.contarRespaldos();
+                console.log(`💽 IndexedDB: ${backupCount} respaldos`);
+            }
+            
+            // Verificar datos críticos
+            const datosCriticos = ['estudiantes', 'config_ciclos', 'ultima_sesion_ft'];
+            let datosFaltantes = [];
+            
+            datosCriticos.forEach(key => {
+                const valor = localStorage.getItem(key);
+                if (!valor || valor === 'null' || valor === 'undefined') {
+                    datosFaltantes.push(key);
+                }
+            });
+            
+            if (datosFaltantes.length > 0) {
+                console.warn(`⚠️ Datos faltantes: ${datosFaltantes.join(', ')}`);
+                
+                // Intentar recuperar de IndexedDB
+                if (this.db) {
+                    await this.recuperarDatosFaltantes(datosFaltantes);
+                } else {
+                    // Crear datos por defecto
+                    await this.crearDatosPorDefecto(datosFaltantes);
+                }
+            } else {
+                console.log('✅ Todos los datos críticos presentes');
+            }
+            
+            // Generar respaldo inicial si no hay respaldos
+            if (backupCount === 0) {
+                console.log('🔄 Generando respaldo inicial...');
+                await this.generarRespaldoInicial();
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error verificando integridad:', error);
+            await this.crearDatosIniciales();
+            return false;
+        }
+    }
+    
+    async crearDatosIniciales() {
+        console.log('🔄 Creando datos iniciales...');
+        
+        try {
+            // Crear datos de estudiantes por defecto
+            const estudiantesEjemplo = [
+                {
+                    id: '1',
+                    nombre: 'Juan Pérez Rodríguez',
+                    codigo: '2025001',
+                    necesidades: []
+                },
+                {
+                    id: '2', 
+                    nombre: 'María González López',
+                    codigo: '2025002',
+                    necesidades: ['Prioridad I']
+                }
+            ];
+            
+            localStorage.setItem('estudiantes', JSON.stringify(estudiantesEjemplo));
+            
+            // Crear configuración de ciclos
+            const configCiclos = {
+                'I': { trabajo_cotidiano: 65, tareas: 10, prueba_ejecucion: 15, asistencia: 10 },
+                'II': { trabajo_cotidiano: 60, tareas: 10, prueba_ejecucion: 20, asistencia: 10 },
+                'III': { trabajo_cotidiano: 50, tareas: 10, proyecto: 30, asistencia: 10 }
+            };
+            
+            localStorage.setItem('config_ciclos', JSON.stringify(configCiclos));
+            
+            // Guardar sesión inicial
+            const sesionInicial = {
+                ciclo: 'III',
+                modulo: 'ofimatica',
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('ultima_sesion_ft', JSON.stringify(sesionInicial));
+            
+            console.log('✅ Datos iniciales creados');
+            
+        } catch (error) {
+            console.error('❌ Error creando datos iniciales:', error);
+            throw error;
+        }
+    }
+    
+    async crearDatosPorDefecto(datosFaltantes) {
+        for (const dato of datosFaltantes) {
+            try {
+                if (dato === 'estudiantes') {
+                    const estudiantesEjemplo = [
+                        {
+                            id: '1',
+                            nombre: 'Juan Pérez Rodríguez',
+                            codigo: '2025001',
+                            necesidades: []
+                        }
+                    ];
+                    localStorage.setItem(dato, JSON.stringify(estudiantesEjemplo));
+                } else if (dato === 'config_ciclos') {
+                    const config = {
+                        'III': { trabajo_cotidiano: 50, tareas: 10, proyecto: 30, asistencia: 10 }
+                    };
+                    localStorage.setItem(dato, JSON.stringify(config));
+                } else {
+                    localStorage.setItem(dato, '{}');
+                }
+                console.log(`✅ Creado dato por defecto: ${dato}`);
+            } catch (error) {
+                console.warn(`⚠️ No se pudo crear ${dato}:`, error);
+            }
+        }
+    }
+    
+    async generarRespaldoInicial() {
+        try {
+            const datos = await this.recolectarDatosCriticos();
+            const timestamp = new Date().toISOString();
+            
+            if (this.db) {
+                await this.guardarEnIndexedDB('initial_backup', datos, timestamp);
+            }
+            
+            // Guardar también en localStorage como respaldo simple
+            localStorage.setItem('respaldo_inicial', JSON.stringify({
+                data: datos,
+                timestamp: timestamp
+            }));
+            
+            console.log('✅ Respaldo inicial generado');
+            
+        } catch (error) {
+            console.warn('⚠️ Error generando respaldo inicial:', error);
+        }
+    }
+    
+    async contarRespaldos() {
+        return new Promise((resolve, reject) => {
+            if (!this.db) {
+                resolve(0);
+                return;
+            }
+            
+            try {
+                const transaction = this.db.transaction(['backups'], 'readonly');
+                const store = transaction.objectStore('backups');
+                const countRequest = store.count();
+                
+                countRequest.onsuccess = () => resolve(countRequest.result);
+                countRequest.onerror = () => {
+                    console.warn('⚠️ Error contando respaldos:', countRequest.error);
+                    resolve(0);
+                };
+            } catch (error) {
+                console.warn('⚠️ Error en transacción:', error);
+                resolve(0);
+            }
+        });
+    }
+    
+    async recuperarDatosFaltantes(datosFaltantes) {
+        console.log('🔄 Intentando recuperar datos faltantes...');
+        
+        for (const dato of datosFaltantes) {
+            try {
+                const recuperado = await this.recuperarDeIndexedDB(dato);
+                if (recuperado) {
+                    localStorage.setItem(dato, JSON.stringify(recuperado));
+                    console.log(`✅ Recuperado: ${dato}`);
+                } else {
+                    // Si no hay en IndexedDB, crear por defecto
+                    await this.crearDatosPorDefecto([dato]);
+                }
+            } catch (error) {
+                console.warn(`⚠️ No se pudo recuperar ${dato}:`, error);
+                await this.crearDatosPorDefecto([dato]);
+            }
+        }
+    }
+    
+    async recuperarDeIndexedDB(key) {
+        return new Promise((resolve, reject) => {
+            if (!this.db) {
+                resolve(null);
+                return;
+            }
+            
+            try {
+                const transaction = this.db.transaction(['backups'], 'readonly');
+                const store = transaction.objectStore('backups');
+                const index = store.index('type');
+                const request = index.getAll(key);
+                
+                request.onsuccess = () => {
+                    if (request.result && request.result.length > 0) {
+                        // Obtener el más reciente
+                        const masReciente = request.result.sort((a, b) => 
+                            new Date(b.timestamp) - new Date(a.timestamp)
+                        )[0];
+                        resolve(masReciente.data);
+                    } else {
+                        resolve(null);
+                    }
+                };
+                
+                request.onerror = () => {
+                    console.warn(`⚠️ Error recuperando ${key}:`, request.error);
+                    resolve(null);
+                };
+            } catch (error) {
+                console.warn(`⚠️ Error en transacción para ${key}:`, error);
+                resolve(null);
+            }
+        });
+    }
+    
+    configurarRespaldoAutomatico() {
+        // Respaldo cada X tiempo
+        const intervalId = setInterval(() => {
+            if (this.isInitialized) {
+                this.generarRespaldoAutomatico();
+            }
+        }, this.config.backupInterval);
+        
+        // Guardar ID del intervalo para limpiar si es necesario
+        this.backupIntervalId = intervalId;
+        
+        // Respaldo antes de cerrar la página
+        window.addEventListener('beforeunload', () => {
+            if (this.isInitialized) {
+                this.generarRespaldoUltimoMomento();
+            }
+        });
+        
+        console.log(`🔄 Respaldo automático configurado cada ${this.config.backupInterval / 60000} minutos`);
+    }
+    
+    async generarRespaldoCompleto() {
+        console.log('🔄 Generando respaldo completo...');
+        
+        try {
+            const timestamp = new Date().toISOString();
+            const backupId = `backup_${timestamp.replace(/[:.]/g, '-')}`;
+            
+            // 1. Recolectar todos los datos
+            const datos = await this.recolectarTodosDatos();
+            
+            // 2. Guardar en IndexedDB si está disponible
+            if (this.db) {
+                await this.guardarEnIndexedDB('full_backup', datos, timestamp);
+            }
+            
+            // 3. Generar archivo de respaldo
+            const archivoRespaldo = await this.generarArchivoRespaldo(datos, backupId);
+            
+            // 4. Limpiar respaldos antiguos
+            if (this.db) {
+                await this.limpiarRespaldosAntiguos();
+            }
+            
+            // 5. Actualizar UI
+            this.actualizarUIEstado('success', `Respaldo ${backupId} generado`);
+            
+            // 6. Guardar referencia en localStorage
+            localStorage.setItem('ultimo_respaldo_completo', JSON.stringify({
+                id: backupId,
+                timestamp: timestamp,
+                file: `${backupId}.json`
+            }));
+            
+            console.log('✅ Respaldo completo generado:', backupId);
+            
+            return {
+                id: backupId,
+                timestamp: timestamp,
+                size: JSON.stringify(datos).length,
+                archivo: archivoRespaldo
+            };
+            
+        } catch (error) {
+            console.error('❌ Error generando respaldo completo:', error);
+            this.actualizarUIEstado('error', 'Error al generar respaldo');
+            throw error;
+        }
+    }
+    
+    async generarRespaldoAutomatico() {
+        try {
+            const timestamp = new Date().toISOString();
+            const datos = await this.recolectarDatosCriticos();
+            
+            if (this.db) {
+                await this.guardarEnIndexedDB('auto_backup', datos, timestamp);
+            }
+            
+            // Actualizar último sincronización en UI
+            const lastSyncElement = document.getElementById('lastSync');
+            if (lastSyncElement) {
+                const ahora = new Date();
+                const hora = ahora.getHours().toString().padStart(2, '0');
+                const minutos = ahora.getMinutes().toString().padStart(2, '0');
+                lastSyncElement.textContent = `${hora}:${minutos}`;
+                lastSyncElement.title = `Último respaldo: ${ahora.toLocaleString()}`;
+            }
+            
+            console.log('✅ Respaldo automático generado');
+            
+        } catch (error) {
+            console.warn('⚠️ Error en respaldo automático:', error);
+        }
+    }
+    
+    async generarRespaldoUltimoMomento() {
+        try {
+            const datos = {
+                estado: this.obtenerEstadoActual(),
+                calificaciones: this.recolectarCalificacionesRecientes(),
+                timestamp: new Date().toISOString()
+            };
+            
+            // Guardar rápidamente en localStorage
+            localStorage.setItem('ultimo_respaldo_rapido', JSON.stringify(datos));
+            
+            // También intentar guardar en IndexedDB si es rápido
+            if (this.db) {
+                try {
+                    await this.guardarEnIndexedDB('quick_backup', datos, datos.timestamp);
+                } catch (e) {
+                    // Ignorar errores en respaldo rápido
+                }
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Error en respaldo último momento:', error);
+        }
+    }
+    
+    recolectarCalificacionesRecientes() {
+        const calificaciones = {};
+        const ahora = new Date();
+        const hace24Horas = new Date(ahora.getTime() - 24 * 60 * 60 * 1000);
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('calificaciones_')) {
+                try {
+                    const item = localStorage.getItem(key);
+                    if (item) {
+                        const datos = JSON.parse(item);
+                        // Solo incluir si se modificaron recientemente
+                        calificaciones[key] = datos;
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ Error parseando ${key}:`, error);
+                }
+            }
+        }
+        
+        return calificaciones;
+    }
+    
+    async recolectarTodosDatos() {
+        const datos = {
+            metadata: {
+                sistema: 'FT-MEP',
+                version: '2.0',
+                timestamp: new Date().toISOString(),
+                usuario: 'docente_ft',
+                navegador: navigator.userAgent,
+                plataforma: navigator.platform
+            },
+            
+            // Datos de localStorage
+            localStorage: this.recolectarLocalStorage(),
+            
+            // Datos de sessionStorage
+            sessionStorage: this.recolectarSessionStorage(),
+            
+            // Datos de IndexedDB (resúmen)
+            indexedDB: await this.recolectarIndexedDBResumen(),
+            
+            // Estado actual de la aplicación
+            estadoAplicacion: this.obtenerEstadoActual(),
+            
+            // Información del sistema
+            sistema: {
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                idioma: navigator.language,
+                cookiesHabilitadas: navigator.cookieEnabled,
+                almacenamientoDisponible: this.verificarAlmacenamientoDisponible()
+            }
+        };
+        
+        return datos;
+    }
+    
+    verificarAlmacenamientoDisponible() {
+        try {
+            if ('storage' in navigator && 'estimate' in navigator.storage) {
+                return 'disponible';
+            }
+            return 'no_verificado';
+        } catch (error) {
+            return 'error';
+        }
+    }
+    
+    recolectarLocalStorage() {
+        const datos = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            try {
+                const valor = localStorage.getItem(key);
+                if (valor) {
+                    // Intentar parsear JSON, si falla guardar como string
+                    try {
+                        datos[key] = JSON.parse(valor);
+                    } catch {
+                        datos[key] = valor;
+                    }
+                }
+            } catch (error) {
+                console.warn(`⚠️ Error recolectando ${key}:`, error);
+                datos[key] = null;
+            }
+        }
+        return datos;
+    }
+    
+    recolectarSessionStorage() {
+        const datos = {};
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            datos[key] = sessionStorage.getItem(key);
+        }
+        return datos;
+    }
+    
+    async recolectarIndexedDBResumen() {
+        if (!this.db) return { disponible: false, razon: 'IndexedDB no inicializada' };
+        
+        try {
+            const backupsCount = await this.contarRespaldos();
+            
+            return {
+                disponible: true,
+                backups: backupsCount,
+                estudiantes: await this.contarRegistros('estudiantes'),
+                calificaciones: await this.contarRegistros('calificaciones'),
+                tamañoEstimado: await this.estimarTamañoBaseDatos()
+            };
+            
+        } catch (error) {
+            console.warn('⚠️ Error recolectando resumen IndexedDB:', error);
+            return { disponible: false, error: error.message };
+        }
+    }
+    
+    async estimarTamañoBaseDatos() {
+        if (!this.db) return 0;
+        
+        try {
+            let tamañoTotal = 0;
+            const stores = ['backups', 'estudiantes', 'calificaciones'];
+            
+            for (const storeName of stores) {
+                const count = await this.contarRegistros(storeName);
+                // Estimación aproximada: 1KB por registro
+                tamañoTotal += count * 1024;
+            }
+            
+            return tamañoTotal;
+        } catch (error) {
+            return 0;
+        }
+    }
+    
+    async contarRegistros(storeName) {
+        return new Promise((resolve, reject) => {
+            if (!this.db) {
+                resolve(0);
+                return;
+            }
+            
+            try {
+                if (!this.db.objectStoreNames.contains(storeName)) {
+                    resolve(0);
+                    return;
+                }
+                
+                const transaction = this.db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.count();
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => {
+                    console.warn(`⚠️ Error contando ${storeName}:`, request.error);
+                    resolve(0);
+                };
+            } catch (error) {
+                console.warn(`⚠️ Error en transacción para ${storeName}:`, error);
+                resolve(0);
+            }
+        });
+    }
+    
+    obtenerEstadoActual() {
+        try {
+            if (window.sistemaFT && window.sistemaFT.estado) {
+                return {
+                    ciclo: window.sistemaFT.estado.cicloActual,
+                    modulo: window.sistemaFT.estado.moduloActual,
+                    estudiante: window.sistemaFT.estado.estudianteActual?.id || null,
+                    estudianteNombre: window.sistemaFT.estado.estudianteActual?.nombre || null,
+                    mes: window.sistemaFT.estado.mesActual,
+                    indicadoresCalificados: Object.keys(window.sistemaFT.estado.calificaciones || {}).length,
+                    totalIndicadores: window.sistemaFT.estado.indicadores?.length || 0
+                };
+            }
+        } catch (error) {
+            console.warn('⚠️ Error obteniendo estado actual:', error);
+        }
+        
+        return { sistema: 'no_disponible', timestamp: new Date().toISOString() };
+    }
+    
+    async recolectarDatosCriticos() {
+        const datosCriticos = ['estudiantes', 'config_ciclos', 'ultima_sesion_ft'];
+        const datos = {};
+        
+        // Recolectar de localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            
+            // Solo incluir datos críticos
+            if (datosCriticos.some(critico => key.includes(critico))) {
+                try {
+                    const valor = localStorage.getItem(key);
+                    if (valor) {
+                        datos[key] = JSON.parse(valor);
+                    }
+                } catch {
+                    datos[key] = localStorage.getItem(key);
+                }
+            }
+            
+            // También incluir calificaciones
+            if (key.startsWith('calificaciones_')) {
+                try {
+                    const valor = localStorage.getItem(key);
+                    if (valor) {
+                        datos[key] = JSON.parse(valor);
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ Error recolectando ${key}:`, error);
+                }
+            }
+        }
+        
+        return datos;
+    }
+    
+    async guardarEnIndexedDB(tipo, datos, timestamp) {
+        return new Promise((resolve, reject) => {
+            if (!this.db) {
+                reject(new Error('IndexedDB no disponible'));
+                return;
+            }
+            
+            try {
+                const transaction = this.db.transaction(['backups'], 'readwrite');
+                const store = transaction.objectStore('backups');
+                
+                const backup = {
+                    type: tipo,
+                    data: datos,
+                    timestamp: timestamp || new Date().toISOString(),
+                    size: JSON.stringify(datos).length
+                };
+                
+                const request = store.add(backup);
+                
+                request.onsuccess = () => {
+                    console.log(`✅ Backup guardado en IndexedDB: ${tipo} (ID: ${request.result})`);
+                    resolve(request.result);
+                };
+                
+                request.onerror = () => {
+                    console.error('❌ Error guardando en IndexedDB:', request.error);
+                    reject(request.error);
+                };
+                
+                transaction.oncomplete = () => {
+                    console.log(`✅ Transacción completada para ${tipo}`);
+                };
+                
+                transaction.onerror = (event) => {
+                    console.error('❌ Error en transacción:', event.target.error);
+                };
+                
+            } catch (error) {
+                console.error('❌ Error en operación IndexedDB:', error);
+                reject(error);
+            }
+        });
+    }
+    
+    async generarArchivoRespaldo(datos, backupId) {
+        return new Promise((resolve, reject) => {
+            try {
+                // Convertir a JSON formateado
+                const jsonString = JSON.stringify(datos, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                
+                // Crear URL para descarga
+                const url = URL.createObjectURL(blob);
+                
+                // Crear enlace de descarga
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${backupId}.json`;
+                a.style.display = 'none';
+                a.textContent = 'Descargar respaldo';
+                
+                document.body.appendChild(a);
+                
+                // Intentar descarga automática
+                setTimeout(() => {
+                    try {
+                        a.click();
+                    } catch (error) {
+                        console.warn('⚠️ No se pudo iniciar descarga automática:', error);
+                        // Mostrar enlace manual
+                        a.style.display = 'block';
+                        a.style.position = 'fixed';
+                        a.style.top = '10px';
+                        a.style.left = '10px';
+                        a.style.zIndex = '10000';
+                        a.style.padding = '10px';
+                        a.style.background = '#007bff';
+                        a.style.color = 'white';
+                        a.style.textDecoration = 'none';
+                        a.style.borderRadius = '5px';
+                        
+                        // Auto-remover después de 30 segundos
+                        setTimeout(() => {
+                            if (a.parentNode) {
+                                a.parentNode.removeChild(a);
+                            }
+                            URL.revokeObjectURL(url);
+                        }, 30000);
+                    }
+                }, 100);
+                
+                // Limpiar después de descarga
+                setTimeout(() => {
+                    if (a.parentNode) {
+                        a.parentNode.removeChild(a);
+                    }
+                    URL.revokeObjectURL(url);
+                }, 1000);
+                
+                console.log(`📁 Archivo de respaldo generado: ${backupId}.json (${(blob.size / 1024 / 1024).toFixed(2)} MB)`);
+                
+                resolve({
+                    nombre: `${backupId}.json`,
+                    tamaño: blob.size,
+                    tamañoMB: (blob.size / 1024 / 1024).toFixed(2),
+                    url: url
+                });
+                
+            } catch (error) {
+                console.error('❌ Error generando archivo de respaldo:', error);
+                reject(error);
+            }
+        });
+    }
+    
+    async limpiarRespaldosAntiguos() {
+        if (!this.db) return;
+        
+        try {
+            const totalBackups = await this.contarRespaldos();
+            
+            if (totalBackups > this.config.maxBackups) {
+                const excedente = totalBackups - this.config.maxBackups;
+                console.log(`🧹 Limpiando ${excedente} respaldos antiguos...`);
+                await this.eliminarRespaldosAntiguos(excedente);
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Error limpiando respaldos antiguos:', error);
+        }
+    }
+    
+    async eliminarRespaldosAntiguos(cantidad) {
+        return new Promise((resolve, reject) => {
+            if (!this.db) {
+                resolve();
+                return;
+            }
+            
+            try {
+                const transaction = this.db.transaction(['backups'], 'readwrite');
+                const store = transaction.objectStore('backups');
+                const index = store.index('timestamp');
+                
+                // Obtener los más antiguos primero
+                const request = index.openCursor();
+                const idsAEliminar = [];
+                let contador = 0;
+                
+                request.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    
+                    if (cursor && contador < cantidad) {
+                        idsAEliminar.push(cursor.primaryKey);
+                        contador++;
+                        cursor.continue();
+                    } else {
+                        // Eliminar los seleccionados
+                        if (idsAEliminar.length > 0) {
+                            this.eliminarPorIds(idsAEliminar, resolve, reject);
+                        } else {
+                            resolve();
+                        }
+                    }
+                };
+                
+                request.onerror = () => {
+                    console.warn('⚠️ Error abriendo cursor:', request.error);
+                    resolve();
+                };
+                
+            } catch (error) {
+                console.warn('⚠️ Error en eliminación:', error);
+                resolve();
+            }
+        });
+    }
+    
+    async eliminarPorIds(ids, resolve, reject) {
+        const transaction = this.db.transaction(['backups'], 'readwrite');
+        const store = transaction.objectStore('backups');
+        
+        let completados = 0;
+        let errores = [];
+        
+        ids.forEach(id => {
+            const request = store.delete(id);
+            
+            request.onsuccess = () => {
+                completados++;
+                if (completados === ids.length) {
+                    if (errores.length > 0) {
+                        console.warn(`⚠️ Errores al eliminar: ${errores.join(', ')}`);
+                        resolve();
+                    } else {
+                        console.log(`✅ Eliminados ${ids.length} respaldos antiguos`);
+                        resolve();
+                    }
+                }
+            };
+            
+            request.onerror = () => {
+                errores.push(id);
+                completados++;
+                
+                if (completados === ids.length) {
+                    console.warn(`⚠️ Errores al eliminar: ${errores.join(', ')}`);
+                    resolve();
+                }
+            };
+        });
+    }
+    
+    async restaurarRespaldo(backupId) {
+        console.log(`🔄 Restaurando respaldo: ${backupId}`);
+        
+        try {
+            let backup;
+            
+            // Intentar obtener de IndexedDB primero
+            if (this.db) {
+                backup = await this.obtenerRespaldoPorId(backupId);
+            }
+            
+            // Si no está en IndexedDB, buscar en localStorage
+            if (!backup) {
+                const backupLocal = localStorage.getItem(`respaldo_${backupId}`);
+                if (backupLocal) {
+                    backup = JSON.parse(backupLocal);
+                }
+            }
+            
+            if (!backup) {
+                throw new Error('Respaldo no encontrado');
+            }
+            
+            // Confirmar restauración
+            const confirmar = confirm(
+                '¿Está seguro de restaurar este respaldo?\n\n' +
+                'ADVERTENCIA: Esto sobrescribirá todos los datos actuales.\n' +
+                'Se recomienda hacer un respaldo actual primero.'
+            );
+            
+            if (!confirmar) {
+                console.log('❌ Restauración cancelada por el usuario');
+                return null;
+            }
+            
+            // 1. Hacer respaldo actual antes de restaurar
+            console.log('🔄 Haciendo respaldo de seguridad actual...');
+            try {
+                await this.generarRespaldoCompleto();
+            } catch (error) {
+                console.warn('⚠️ No se pudo hacer respaldo de seguridad:', error);
+            }
+            
+            // 2. Restaurar localStorage
+            if (backup.data && backup.data.localStorage) {
+                this.restaurarLocalStorage(backup.data.localStorage);
+            } else if (backup.localStorage) {
+                this.restaurarLocalStorage(backup.localStorage);
+            }
+            
+            // 3. Restaurar sessionStorage
+            if (backup.data && backup.data.sessionStorage) {
+                this.restaurarSessionStorage(backup.data.sessionStorage);
+            } else if (backup.sessionStorage) {
+                this.restaurarSessionStorage(backup.sessionStorage);
+            }
+            
+            // 4. Notificar éxito
+            this.actualizarUIEstado('success', `Respaldo restaurado - ${backupId}`);
+            
+            // 5. Recargar la página para aplicar cambios
+            setTimeout(() => {
+                const recargar = confirm(
+                    'Respaldo restaurado exitosamente.\n\n' +
+                    '¿Desea recargar la página para aplicar los cambios?'
+                );
+                
+                if (recargar) {
+                    location.reload();
+                }
+            }, 1000);
+            
+            console.log('✅ Respaldo restaurado exitosamente');
+            
+            return backup;
+            
+        } catch (error) {
+            console.error('❌ Error restaurando respaldo:', error);
+            this.actualizarUIEstado('error', 'Error al restaurar respaldo');
+            throw error;
+        }
+    }
+    
+    async obtenerRespaldoPorId(backupId) {
+        return new Promise((resolve, reject) => {
+            if (!this.db) {
+                resolve(null);
+                return;
+            }
+            
+            try {
+                const transaction = this.db.transaction(['backups'], 'readonly');
+                const store = transaction.objectStore('backups');
+                
+                // Intentar como número (ID autoincremental)
+                const idNumero = parseInt(backupId);
+                if (!isNaN(idNumero)) {
+                    const request = store.get(idNumero);
+                    
+                    request.onsuccess = () => {
+                        if (request.result) {
+                            resolve(request.result);
+                        } else {
+                            // Buscar por timestamp o nombre
+                            this.buscarRespaldoPorNombre(backupId, resolve, reject);
+                        }
+                    };
+                    
+                    request.onerror = () => {
+                        this.buscarRespaldoPorNombre(backupId, resolve, reject);
+                    };
+                } else {
+                    this.buscarRespaldoPorNombre(backupId, resolve, reject);
+                }
+                
+            } catch (error) {
+                console.warn('⚠️ Error buscando respaldo:', error);
+                resolve(null);
+            }
+        });
+    }
+    
+    buscarRespaldoPorNombre(backupId, resolve, reject) {
+        if (!this.db) {
+            resolve(null);
+            return;
+        }
+        
+        const transaction = this.db.transaction(['backups'], 'readonly');
+        const store = transaction.objectStore('backups');
+        const index = store.index('timestamp');
+        
+        // Buscar todos y filtrar
+        const request = store.getAll();
+        
+        request.onsuccess = () => {
+            const backups = request.result;
+            const encontrado = backups.find(backup => 
+                backup.id.toString() === backupId ||
+                (backup.data && backup.data.metadata && 
+                 backup.data.metadata.timestamp && 
+                 backup.data.metadata.timestamp.includes(backupId)) ||
+                backup.timestamp.includes(backupId)
+            );
+            
+            resolve(encontrado || null);
+        };
+        
+        request.onerror = () => {
+            console.warn('⚠️ Error buscando todos los respaldos:', request.error);
+            resolve(null);
+        };
+    }
+    
+    restaurarLocalStorage(datos) {
+        // Guardar datos actuales temporalmente (solo para recuperación)
+        const datosActuales = this.recolectarLocalStorage();
+        sessionStorage.setItem('datos_antes_restauracion', JSON.stringify(datosActuales));
+        
+        // Limpiar localStorage actual
+        localStorage.clear();
+        
+        // Restaurar datos
+        Object.keys(datos).forEach(key => {
+            try {
+                if (datos[key] !== null && datos[key] !== undefined) {
+                    if (typeof datos[key] === 'object') {
+                        localStorage.setItem(key, JSON.stringify(datos[key]));
+                    } else {
+                        localStorage.setItem(key, datos[key]);
+                    }
+                }
+            } catch (error) {
+                console.warn(`⚠️ Error restaurando ${key}:`, error);
+            }
+        });
+        
+        console.log('✅ localStorage restaurado');
+    }
+    
+    restaurarSessionStorage(datos) {
+        sessionStorage.clear();
+        
+        Object.keys(datos).forEach(key => {
+            if (key !== 'datos_antes_restauracion') { // No sobrescribir datos de recuperación
+                sessionStorage.setItem(key, datos[key]);
+            }
+        });
+        
+        console.log('✅ sessionStorage restaurado');
+    }
+    
+    async importarDesdeArchivo(archivo) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = async (event) => {
+                try {
+                    const datos = JSON.parse(event.target.result);
+                    
+                    // Validar estructura del respaldo
+                    if (!this.validarEstructuraRespaldo(datos)) {
+                        throw new Error('Archivo de respaldo inválido o corrupto');
+                    }
+                    
+                    // Preguntar qué hacer con el respaldo
+                    const opcion = prompt(
+                        '¿Qué desea hacer con el respaldo importado?\n\n' +
+                        '1. Solo guardar el respaldo\n' +
+                        '2. Restaurar el respaldo (sobrescribe datos actuales)\n\n' +
+                        'Ingrese 1 o 2:'
+                    );
+                    
+                    // Guardar en IndexedDB
+                    const timestamp = new Date().toISOString();
+                    if (this.db) {
+                        await this.guardarEnIndexedDB('imported_backup', datos, timestamp);
+                    }
+                    
+                    // También guardar en localStorage
+                    localStorage.setItem(`respaldo_importado_${timestamp}`, JSON.stringify(datos));
+                    
+                    if (opcion === '2') {
+                        // Restaurar el respaldo
+                        await this.restaurarRespaldo(`imported_backup`);
+                    }
+                    
+                    this.actualizarUIEstado('success', 'Respaldo importado exitosamente');
+                    
+                    resolve(datos);
+                    
+                } catch (error) {
+                    console.error('❌ Error importando respaldo:', error);
+                    this.actualizarUIEstado('error', 'Error importando respaldo: ' + error.message);
+                    reject(error);
+                }
+            };
+            
+            reader.onerror = () => {
+                reject(new Error('Error leyendo archivo'));
+            };
+            
+            reader.readAsText(archivo);
+        });
+    }
+    
+    validarEstructuraRespaldo(datos) {
+        try {
+            // Validar que sea un objeto
+            if (!datos || typeof datos !== 'object') {
+                return false;
+            }
+            
+            // Validar estructura básica
+            const tieneMetadata = datos.metadata && datos.metadata.sistema === 'FT-MEP';
+            const tieneLocalStorage = datos.localStorage !== undefined;
+            
+            // Validar que no esté corrupto
+            try {
+                JSON.stringify(datos);
+            } catch {
+                return false;
+            }
+            
+            return tieneMetadata && tieneLocalStorage;
+            
+        } catch (error) {
+            return false;
+        }
+    }
+    
+    actualizarUIEstado(estado = 'success', mensaje = '') {
+        try {
+            // Actualizar elementos de UI
+            const statusElement = document.getElementById('backupStatusText');
+            const backupIndicator = document.getElementById('backupIndicator');
+            
+            if (statusElement) {
+                statusElement.textContent = mensaje || 'ACTIVO';
+                
+                if (estado === 'error') {
+                    statusElement.style.color = '#f44336';
+                    statusElement.title = 'Sistema de respaldo con errores';
+                } else if (estado === 'success') {
+                    statusElement.style.color = '#4caf50';
+                    statusElement.title = 'Sistema de respaldo funcionando';
+                } else {
+                    statusElement.style.color = '#ff9800';
+                    statusElement.title = 'Sistema de respaldo en advertencia';
+                }
+            }
+            
+            if (backupIndicator) {
+                if (estado === 'success') {
+                    backupIndicator.textContent = '✓';
+                    backupIndicator.style.backgroundColor = '#4caf50';
+                    backupIndicator.title = 'Respaldo activo';
+                } else if (estado === 'error') {
+                    backupIndicator.textContent = '!';
+                    backupIndicator.style.backgroundColor = '#f44336';
+                    backupIndicator.title = 'Error en respaldo';
+                } else {
+                    backupIndicator.textContent = '⚠';
+                    backupIndicator.style.backgroundColor = '#ff9800';
+                    backupIndicator.title = 'Advertencia en respaldo';
+                }
+            }
+            
+            // Actualizar estadísticas de almacenamiento
+            this.actualizarEstadisticasAlmacenamiento();
+            
+        } catch (error) {
+            console.warn('⚠️ Error actualizando UI:', error);
+        }
+    }
+    
+    async actualizarEstadisticasAlmacenamiento() {
+        try {
+            // Calcular tamaño de localStorage
+            let localStorageSize = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                if (value) {
+                    localStorageSize += (key.length + value.length) * 2;
+                }
+            }
+            
+            // Obtener cantidad de respaldos
+            const backupCount = await this.contarRespaldos();
+            
+            // Actualizar UI
+            const storageElement = document.getElementById('storageUsed');
+            const backupElement = document.getElementById('backupCount');
+            
+            if (storageElement) {
+                const mb = (localStorageSize / 1024 / 1024);
+                if (mb > 1) {
+                    storageElement.textContent = `${mb.toFixed(2)} MB`;
+                } else {
+                    const kb = (localStorageSize / 1024);
+                    storageElement.textContent = `${kb.toFixed(0)} KB`;
+                }
+                storageElement.title = `Tamaño total en localStorage: ${localStorageSize} bytes`;
+            }
+            
+            if (backupElement) {
+                backupElement.textContent = `${backupCount} respaldos`;
+                backupElement.title = `Número de respaldos almacenados`;
+            }
+            
+            // Actualizar última sincronización
+            const lastSync = document.getElementById('lastSync');
+            if (lastSync && !lastSync.textContent) {
+                const ahora = new Date();
+                lastSync.textContent = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                lastSync.title = `Última actualización: ${ahora.toLocaleString()}`;
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Error actualizando estadísticas:', error);
+        }
+    }
+    
+    mostrarError(mensaje) {
+        console.error('❌ Error sistema de respaldo:', mensaje);
+        
+        try {
+            // Mostrar en UI si es posible
+            const errorElement = document.createElement('div');
+            errorElement.className = 'backup-error-alert';
+            errorElement.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 10000;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                max-width: 300px;
+                font-family: Arial, sans-serif;
+            `;
+            
+            errorElement.innerHTML = `
+                <strong>⚠️ Sistema de Respaldo</strong>
+                <p style="margin: 8px 0; font-size: 14px;">${mensaje}</p>
+                <small style="opacity: 0.8;">Los datos se guardarán solo en localStorage.</small>
+                <button onclick="this.parentElement.remove()" style="
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    background: none;
+                    border: none;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">×</button>
+            `;
+            
+            document.body.appendChild(errorElement);
+            
+            // Auto-eliminar después de 10 segundos
+            setTimeout(() => {
+                if (errorElement.parentNode) {
+                    errorElement.parentNode.removeChild(errorElement);
+                }
+            }, 10000);
+            
+        } catch (error) {
+            console.warn('⚠️ No se pudo mostrar error en UI:', error);
+        }
+    }
+    
+    // Métodos públicos mejorados
+    async guardarDatos(tipo, datos) {
+        try {
+            const timestamp = new Date().toISOString();
+            
+            if (this.db) {
+                return await this.guardarEnIndexedDB(tipo, datos, timestamp);
+            } else {
+                // Guardar en localStorage como fallback
+                const key = `backup_${tipo}_${timestamp}`;
+                localStorage.setItem(key, JSON.stringify({
+                    type: tipo,
+                    data: datos,
+                    timestamp: timestamp
+                }));
+                return key;
+            }
+        } catch (error) {
+            console.error('❌ Error guardando datos:', error);
+            throw error;
+        }
+    }
+    
+    async obtenerDatos(tipo, limite = 10) {
+        try {
+            if (this.db) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(['backups'], 'readonly');
+                    const store = transaction.objectStore('backups');
+                    const index = store.index('type');
+                    const request = index.getAll(tipo);
+                    
+                    request.onsuccess = () => {
+                        const resultados = request.result
+                            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                            .slice(0, limite);
+                        resolve(resultados);
+                    };
+                    
+                    request.onerror = () => reject(request.error);
+                });
+            } else {
+                // Buscar en localStorage
+                const resultados = [];
+                const prefix = `backup_${tipo}_`;
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith(prefix)) {
+                        try {
+                            const dato = JSON.parse(localStorage.getItem(key));
+                            resultados.push(dato);
+                        } catch (error) {
+                            console.warn(`⚠️ Error parseando ${key}:`, error);
+                        }
+                    }
+                }
+                
+                return resultados
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .slice(0, limite);
+            }
+        } catch (error) {
+            console.error('❌ Error obteniendo datos:', error);
+            return [];
+        }
+    }
+    
+    async eliminarDatosAntiguos(tipo, dias = 30) {
+        try {
+            const fechaLimite = new Date();
+            fechaLimite.setDate(fechaLimite.getDate() - dias);
+            
+            if (this.db) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(['backups'], 'readwrite');
+                    const store = transaction.objectStore('backups');
+                    const index = store.index('timestamp');
+                    const range = IDBKeyRange.upperBound(fechaLimite.toISOString());
+                    
+                    const request = index.openCursor(range);
+                    let eliminados = 0;
+                    
+                    request.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        
+                        if (cursor) {
+                            if (cursor.value.type === tipo) {
+                                cursor.delete();
+                                eliminados++;
+                            }
+                            cursor.continue();
+                        } else {
+                            console.log(`🧹 Eliminados ${eliminados} registros antiguos de ${tipo}`);
+                            resolve(eliminados);
+                        }
+                    };
+                    
+                    request.onerror = () => reject(request.error);
+                });
+            } else {
+                // Eliminar de localStorage
+                let eliminados = 0;
+                const prefix = `backup_${tipo}_`;
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith(prefix)) {
+                        try {
+                            const dato = JSON.parse(localStorage.getItem(key));
+                            const fechaDato = new Date(dato.timestamp);
+                            
+                            if (fechaDato < fechaLimite) {
+                                localStorage.removeItem(key);
+                                eliminados++;
+                            }
+                        } catch (error) {
+                            console.warn(`⚠️ Error procesando ${key}:`, error);
+                        }
+                    }
+                }
+                
+                console.log(`🧹 Eliminados ${eliminados} registros antiguos de ${tipo} (localStorage)`);
+                return eliminados;
+            }
+        } catch (error) {
+            console.error('❌ Error eliminando datos antiguos:', error);
+            return 0;
+        }
+    }
+    
+    // Métodos de utilidad
+    async obtenerRespaldosDisponibles() {
+        try {
+            if (this.db) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(['backups'], 'readonly');
+                    const store = transaction.objectStore('backups');
+                    const request = store.getAll();
+                    
+                    request.onsuccess = () => {
+                        const respaldos = request.result
+                            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                            .map(backup => ({
+                                id: backup.id,
+                                type: backup.type,
+                                timestamp: backup.timestamp,
+                                size: backup.size,
+                                fecha: new Date(backup.timestamp).toLocaleString()
+                            }));
+                        resolve(respaldos);
+                    };
+                    
+                    request.onerror = () => reject(request.error);
+                });
+            } else {
+                // Buscar en localStorage
+                const respaldos = [];
+                const backupKeys = [];
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('backup_') || key.startsWith('respaldo_')) {
+                        backupKeys.push(key);
+                    }
+                }
+                
+                for (const key of backupKeys) {
+                    try {
+                        const dato = JSON.parse(localStorage.getItem(key));
+                        respaldos.push({
+                            id: key,
+                            type: dato.type || 'localStorage',
+                            timestamp: dato.timestamp || new Date().toISOString(),
+                            size: JSON.stringify(dato).length,
+                            fecha: new Date(dato.timestamp || Date.now()).toLocaleString()
+                        });
+                    } catch (error) {
+                        console.warn(`⚠️ Error procesando ${key}:`, error);
+                    }
+                }
+                
+                return respaldos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+        } catch (error) {
+            console.error('❌ Error obteniendo respaldos disponibles:', error);
+            return [];
+        }
+    }
+    
+    async limpiarTodo() {
+        try {
+            const confirmar = confirm(
+                '¿Está seguro de limpiar TODOS los respaldos?\n\n' +
+                'Esta acción no se puede deshacer.\n' +
+                'Se eliminarán todos los respaldos de IndexedDB y localStorage.'
+            );
+            
+            if (!confirmar) {
+                return false;
+            }
+            
+            // Limpiar IndexedDB
+            if (this.db) {
+                const stores = ['backups', 'estudiantes', 'calificaciones'];
+                for (const storeName of stores) {
+                    try {
+                        const transaction = this.db.transaction([storeName], 'readwrite');
+                        const store = transaction.objectStore(storeName);
+                        const clearRequest = store.clear();
+                        
+                        await new Promise((resolve, reject) => {
+                            clearRequest.onsuccess = () => resolve();
+                            clearRequest.onerror = () => reject(clearRequest.error);
+                        });
+                    } catch (error) {
+                        console.warn(`⚠️ Error limpiando ${storeName}:`, error);
+                    }
+                }
+            }
+            
+            // Limpiar respaldos de localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('backup_') || key.startsWith('respaldo_')) {
+                    localStorage.removeItem(key);
+                    i--; // Ajustar índice después de eliminar
+                }
+            }
+            
+            console.log('✅ Todos los respaldos eliminados');
+            this.actualizarUIEstado('success', 'Respaldos eliminados');
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error limpiando todo:', error);
+            this.actualizarUIEstado('error', 'Error al limpiar respaldos');
+            return false;
+        }
+    }
+}
+
+// ==============================================
+// INICIALIZACIÓN GLOBAL MEJORADA
+// ==============================================
+
+// Crear instancia global con manejo de errores
+let backupManagerInstance = null;
+
+try {
+    backupManagerInstance = new BackupManager();
+    window.backupManager = backupManagerInstance;
+    
+    // Exponer métodos útiles globalmente
+    window.generarRespaldoCompleto = () => backupManagerInstance.generarRespaldoCompleto();
+    window.restaurarUltimoRespaldo = () => {
+        backupManagerInstance.obtenerRespaldosDisponibles()
+            .then(respaldos => {
+                if (respaldos.length > 0) {
+                    const ultimo = respaldos[0];
+                    backupManagerInstance.restaurarRespaldo(ultimo.id);
+                } else {
+                    alert('No hay respaldos disponibles');
+                }
+            });
+    };
+    
+    console.log('✅ BackupManager inicializado globalmente');
+    
+} catch (error) {
+    console.error('❌ Error crítico inicializando BackupManager:', error);
+    
+    // Crear un stub básico para evitar errores
+    window.backupManager = {
+        guardarDatos: () => Promise.resolve(),
+        generarRespaldoCompleto: () => Promise.reject(new Error('BackupManager no disponible')),
+        isInitialized: false
+    };
+}
+
+// Exportar para uso en módulos
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = BackupManager;
+}
