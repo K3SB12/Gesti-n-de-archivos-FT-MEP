@@ -307,11 +307,11 @@
     <!-- Chart.js para gráficos (opcional, cargar solo si se necesita) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+        <!-- ============================================= -->
+    <!-- CÓDIGO DE INICIALIZACIÓN SIMPLIFICADO -->
     <!-- ============================================= -->
-    <!-- CÓDIGO DE INICIALIZACIÓN MEJORADO -->
-    <!-- ============================================= -->
-   <script>
-        // Función para manejar el cierre de modales
+    <script>
+        // Función para manejar el cierre de modales (SOLO LO ESENCIAL)
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -328,184 +328,42 @@
             }
         }
         
-        // FUNCIONES DEL DASHBOARD
-        function volverDashboard() {
-            console.log('Volviendo al dashboard');
-            mostrarDashboard();
-        }
-        
-        function cargarNivel(nivelId) {
-            console.log('Cargando nivel:', nivelId);
-            // Por ahora solo muestra un mensaje
-            const nombres = {
-                'primaria-ciclo-I': 'I Ciclo (1°-3°)',
-                'primaria-ciclo-II': 'II Ciclo (4°-6°)',
-                'secundaria-ciclo-III': 'III Ciclo (7°-9°)'
-            };
-            
-            const contenedor = document.getElementById('contenedorPrincipal');
-            if (contenedor) {
-                contenedor.innerHTML = `
-                    <div class="nivel-vista">
-                        <div class="nivel-header">
-                            <button class="btn-volver" onclick="volverDashboard()">
-                                <i class="fas fa-arrow-left"></i> Volver al Dashboard
-                            </button>
-                            <h2><i class="fas fa-folder-open"></i> ${nombres[nivelId] || nivelId}</h2>
-                        </div>
-                        <div class="nivel-contenido">
-                            <p>Esta es la vista del nivel <strong>${nombres[nivelId] || nivelId}</strong>.</p>
-                            <p>Los módulos se cargarán desde: <code>modulos-ft/${obtenerRutaNivel(nivelId)}/</code></p>
-                            <button class="btn btn-primary" onclick="crearModuloEjemplo('${nivelId}')">
-                                <i class="fas fa-plus"></i> Crear Módulo de Ejemplo
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-        
-        function obtenerRutaNivel(nivelId) {
-            const rutas = {
-                'primaria-ciclo-I': 'primaria/ciclo-I',
-                'primaria-ciclo-II': 'primaria/ciclo-II',
-                'secundaria-ciclo-III': 'secundaria/ciclo-III'
-            };
-            return rutas[nivelId] || nivelId;
-        }
-        
-        function crearModuloEjemplo(nivelId) {
-            alert(`Creando módulo de ejemplo para: ${nivelId}`);
-        }
-        
-        function mostrarDashboard() {
-            const contenedor = document.getElementById('contenedorPrincipal');
-            if (!contenedor) return;
-            
-            contenedor.innerHTML = `
-                <div class="dashboard">
-                    <div class="dashboard-header">
-                        <h2><i class="fas fa-tachometer-alt"></i> Panel de Control FT-MEP</h2>
-                        <p>Gestión académica para Formación Tecnológica - MEP Costa Rica</p>
-                    </div>
-                    
-                    <div class="dashboard-stats">
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stat-content">
-                                <h3>5</h3>
-                                <p>Estudiantes</p>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-book"></i>
-                            </div>
-                            <div class="stat-content">
-                                <h3>12</h3>
-                                <p>Módulos</p>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="stat-content">
-                                <h3>85%</h3>
-                                <p>Promedio</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="seccion-dashboard">
-                        <h3><i class="fas fa-graduation-cap"></i> Acceso Rápido a Niveles</h3>
-                        <div class="acceso-rapido">
-                            <button class="btn-nivel" onclick="cargarNivel('primaria-ciclo-I')">
-                                <i class="fas fa-child"></i> I Ciclo
-                            </button>
-                            <button class="btn-nivel" onclick="cargarNivel('primaria-ciclo-II')">
-                                <i class="fas fa-user-graduate"></i> II Ciclo
-                            </button>
-                            <button class="btn-nivel" onclick="cargarNivel('secundaria-ciclo-III')">
-                                <i class="fas fa-graduation-cap"></i> III Ciclo
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function activarAsistenteIA() {
-            alert('🤖 Asistente IA activado');
-        }
-        function gestionarEstudiantes() {
-            alert('📋 Gestión de Estudiantes\n\n• Agregar nuevos estudiantes\n• Editar información\n• Asignar a grupos');
-        }
-        
-        function generarReportes() {
-            alert('📄 Generar Reportes\n\n• Boletas de calificaciones\n• Certificados\n• Estadísticas');
-        }
-        
-        function calcularNotas() {
-            alert('🧮 Calcular Notas\n\nUsando distribución MEP:\n• 40% Trabajos prácticos\n• 30% Proyecto final\n• 20% Evaluaciones\n• 10% Participación');
-        }
-        
-        // Inicializar sistema al cargar
+        // Configurar event listeners para el modal
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Sistema FT-MEP inicializando...');
+            console.log('🔄 Configurando modal...');
             
-            // ¡ESTA ES LA CLAVE! Usar la función profesional de app.js:
-            if (typeof window.mostrarDashboard === 'function') {
-                window.mostrarDashboard(); // Llama a la función de app.js
-            } else {
-                // Si por algún motivo no está disponible, muestra el básico
-                console.warn('Usando dashboard básico');
-                // Aquí iría tu función simple actual
-            }
-            
-            // Configurar event listeners para el modal (tu código existente)
             const modal = document.getElementById('applyAllModal');
             if (modal) {
-                // ... tu código existente del modal ...
                 const closeBtn = modal.querySelector('.modal-close');
                 if (closeBtn) {
                     closeBtn.addEventListener('click', function() {
                         closeModal('applyAllModal');
                     });
                 }
-                // ... resto de tu código del modal ...
+                
+                // Configurar botones de cancelar
+                const cancelBtn = modal.querySelector('.modal-cancel');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function() {
+                        closeModal('applyAllModal');
+                    });
+                }
             }
             
-            // Inicializar sistema de respaldo
-            if(typeof BackupManager !== 'undefined') {
-                const backupManager = new BackupManager();
-                backupManager.init();
-            }
-            
-            // Inicializar asistente IA
-            if(typeof AsistenteIA !== 'undefined') {
-                window.iaAssistant = new AsistenteIA();
-                document.getElementById('aiStatusText').textContent = 'ACTIVO';
-            }
-            
-            console.log('✅ Sistema FT-MEP listo');
+            console.log('✅ Modal configurado correctamente');
+            // app.js maneja el dashboard automáticamente
         });
         
         // Hacer funciones disponibles globalmente
-        window.volverDashboard = volverDashboard;
-        window.cargarNivel = cargarNivel;
-        window.activarAsistenteIA = activarAsistenteIA;
-        window.mostrarDashboard = mostrarDashboard;
-        window.gestionarEstudiantes = gestionarEstudiantes;
-        window.generarReportes = generarReportes;
-        window.calcularNotas = calcularNotas;
+        window.closeModal = closeModal;
+        window.openModal = openModal;
     </script>
+    
+    <!-- Chart.js para gráficos (opcional, cargar solo si se necesita) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+
 
 
 
