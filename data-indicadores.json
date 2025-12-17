@@ -1,0 +1,80 @@
+{
+    "espanol": [
+        {
+            "id": "ind-1",
+            "texto": "Compara las características, estructura y elementos de textos expositivos, narrativos y descriptivos.",
+            "mes": "octubre",
+            "criterios": {
+                "alto": {
+                    "puntuacion": 3,
+                    "descripcion": "Se identifica de forma completa y correcta las características, la estructura y los elementos de textos expositivo, narrativo y descriptivo, y se diferencian claramente sus funciones comunicativas."
+                },
+                "medio": {
+                    "puntuacion": 2,
+                    "descripcion": "Se identifica parcialmente las características, estructura y elementos de los tres tipos de textos, con errores menores en la clasificación."
+                },
+                "bajo": {
+                    "puntuacion": 1,
+                    "descripcion": "Se identifica mínimamente o no se logra distinguir entre textos expositivo, narrativo y descriptivo."
+                }
+            }
+        },
+        {
+            "id": "ind-2",
+            "texto": "Elaboración pequeños textos expositivos, en los cuales se visualice claramente la estructura del tipo de texto estudiado.",
+            "mes": "octubre",
+            "criterios": {
+                "alto": {
+                    "puntuacion": 3,
+                    "descripcion": "Elabora textos expositivos con estructura clara (tesis, datos, argumentos) y uso adecuado del lenguaje."
+                },
+                "medio": {
+                    "puntuacion": 2,
+                    "descripcion": "Elabora textos expositivos con estructura básica pero con algunos errores en la organización de ideas."
+                },
+                "bajo": {
+                    "puntuacion": 1,
+                    "descripcion": "No logra elaborar textos expositivos con la estructura requerida."
+                }
+            }
+        },
+        {
+            "id": "ind-3",
+            "texto": "Elaboración pequeños textos narrativos en los cuales se visualice claramente la estructura del tipo de texto estudiado.",
+            "mes": "octubre",
+            "criterios": {
+                "alto": {
+                    "puntuacion": 3,
+                    "descripcion": "Elabora textos narrativos con estructura completa (planteamiento, conflicto, desenlace) y personajes definidos."
+                },
+                "medio": {
+                    "puntuacion": 2,
+                    "descripcion": "Elabora textos narrativos con estructura básica pero desarrollo limitado de los elementos narrativos."
+                },
+                "bajo": {
+                    "puntuacion": 1,
+                    "descripcion": "No logra elaborar textos narrativos con la estructura requerida."
+                }
+            }
+        },
+        {
+            "id": "ind-4",
+            "texto": "Elaboración pequeños textos descriptivos en los cuales se visualice claramente la estructura del tipo de texto estudiado.",
+            "mes": "octubre",
+            "criterios": {
+                "alto": {
+                    "puntuacion": 3,
+                    "descripcion": "Elabora textos descriptivos con riqueza de detalles sensoriales y organización coherente."
+                },
+                "medio": {
+                    "puntuacion": 2,
+                    "descripcion": "Elabora textos descriptivos con algunos detalles pero organización limitada."
+                },
+                "bajo": {
+                    "puntuacion": 1,
+                    "descripcion": "No logra elaborar textos descriptivos con la estructura requerida."
+                }
+            }
+        }
+    ]
+}

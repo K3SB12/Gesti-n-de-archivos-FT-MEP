@@ -1,0 +1,45 @@
+{
+  "I": {
+    "nombre": "I Ciclo",
+    "descripcion": "Educación General Básica - Ciclo I",
+    "distribucion": {
+      "trabajo_cotidiano": 65,
+      "tareas": 10,
+      "prueba_ejecucion": 15,
+      "asistencia": 10
+    },
+    "nota_minima": 65,
+    "niveles": ["1", "2", "3", "4", "5", "6"],
+    "edad_typical": [6, 12],
+    "enfoque": "Desarrollo de habilidades básicas y exploración tecnológica"
+  },
+  "II": {
+    "nombre": "II Ciclo",
+    "descripcion": "Educación General Básica - Ciclo II",
+    "distribucion": {
+      "trabajo_cotidiano": 60,
+      "tareas": 10,
+      "prueba_ejecucion": 20,
+      "asistencia": 10
+    },
+    "nota_minima": 65,
+    "niveles": ["7", "8", "9"],
+    "edad_typical": [12, 15],
+    "enfoque": "Profundización en aplicaciones tecnológicas básicas"
+  },
+  "III": {
+    "nombre": "III Ciclo",
+    "descripcion": "Educación Diversificada - Formación Tecnológica",
+    "distribucion": {
+      "trabajo_cotidiano": 50,
+      "tareas": 10,
+      "proyecto": 30,
+      "asistencia": 10
+    },
+    "nota_minima": 70,
+    "niveles": ["10", "11", "12"],
+    "edad_typical": [15, 18],
+    "enfoque": "Especialización tecnológica con enfoque en proyectos aplicados",
+    "especialidades": ["Informática", "Diseño Digital", "Redes", "Electrónica"]
+  }
+}
