@@ -1,0 +1,53 @@
+{
+  "sistema": "Indicadores de Formación Tecnológica - MEP",
+  "version": "2.0",
+  "areas_ft": [
+    "Ofimática Aplicada",
+    "Programación Creativa", 
+    "Redes y Telecomunicaciones",
+    "Diseño Digital",
+    "Mantenimiento de Equipos",
+    "Seguridad Informática"
+  ],
+  "indicadores_generales": {
+    "tecnologia_sociedad": [
+      {
+        "id": "ts-001",
+        "texto": "Analiza el impacto de la tecnología en la sociedad y el ambiente",
+        "nivel": "III",
+        "ejemplo": "Evalúa el ciclo de vida de productos tecnológicos"
+      },
+      {
+        "id": "ts-002", 
+        "texto": "Propone soluciones tecnológicas sostenibles para problemas comunitarios",
+        "nivel": "III",
+        "ejemplo": "Diseña sistema de reciclaje tecnológico"
+      }
+    ],
+    "procesos_productivos": [
+      {
+        "id": "pp-001",
+        "texto": "Aplica metodologías de diseño para desarrollar productos tecnológicos",
+        "nivel": "III",
+        "ejemplo": "Crea prototipo funcional siguiendo etapas de diseño"
+      }
+    ],
+    "gestion_tecnologica": [
+      {
+        "id": "gt-001",
+        "texto": "Planifica y gestiona recursos tecnológicos para proyectos",
+        "nivel": "III", 
+        "ejemplo": "Organiza cronograma y materiales para proyecto FT"
+      }
+    ],
+    "comunicacion_tecnica": [
+      {
+        "id": "ct-001",
+        "texto": "Comunica información técnica mediante diversos medios digitales",
+        "nivel": "III",
+        "ejemplo": "Crea presentación multimedia sobre proyecto tecnológico"
+      }
+    ]
+  },
+  "notas": "Estos son indicadores generales de Formación Tecnológica. Los indicadores específicos por módulo están en modulos-ft/[modulo].json"
+}
