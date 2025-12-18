@@ -4726,6 +4726,105 @@ body.modal-open {
     }
 }
 
+/* Estilos para información de estudiantes */
+.estudiante-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #666;
+}
+
+.estudiante-estadisticas {
+    display: flex;
+    gap: 10px;
+}
+
+.estadistica-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: #f5f5f5;
+}
+
+.asistencia-alta { color: #28a745; background: #d4edda; }
+.asistencia-media { color: #ffc107; background: #fff3cd; }
+.asistencia-baja { color: #dc3545; background: #f8d7da; }
+
+.nota-alta { color: #28a745; background: #d4edda; }
+.nota-media { color: #ffc107; background: #fff3cd; }
+.nota-baja { color: #dc3545; background: #f8d7da; }
+
+.badge-necesidad {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-left: 8px;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Mejoras para los botones de nivel */
+.btn-nivel {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-nivel:hover {
+    background: #f8f9fa;
+}
+
+.btn-nivel.activo[data-nivel="3"] {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.btn-nivel.activo[data-nivel="2"] {
+    background: #ffc107;
+    color: #212529;
+    border-color: #ffc107;
+}
+
+.btn-nivel.activo[data-nivel="1"] {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.indicador-descripcion {
+    margin-top: 5px;
+    font-size: 11px;
+    color: #666;
+    line-height: 1.3;
+}
+
+.total-etiqueta {
+    font-size: 10px;
+    color: #999;
+    text-align: center;
+    margin-top: 2px;
+}
+
 
 
 
