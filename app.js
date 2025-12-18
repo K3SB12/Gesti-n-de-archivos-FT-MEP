@@ -279,22 +279,54 @@ async function cargarNivel(nivelId) {
 }
 
 // AÑADE esta NUEVA función:
+// REEMPLAZA LA FUNCIÓN COMPLETA cargarYMostrarModulosReales:
 async function cargarYMostrarModulosReales(nivelId) {
     try {
         // 1. Cargar configuración de ciclos para saber qué módulos tocan
         const response = await fetch('./data/ciclos-config.json');
         const ciclosConfig = await response.json();
         
-        // 2. Determinar módulos para este ciclo
-        const moduloKeys = {
-            'primaria-ciclo-I': ['ofimatica'],
-            'primaria-ciclo-II': ['ofimatica', 'programacion'],
-            'secundaria-ciclo-III': ['ofimatica', 'programacion', 'redes']
+        console.log('📊 Configuración de ciclos cargada:', ciclosConfig);
+        
+        // 2. Mapear nivelId a los IDs de tu JSON
+        const nivelMap = {
+            'primaria-ciclo-I': 'ciclo-I',
+            'primaria-ciclo-II': 'ciclo-II',
+            'secundaria-ciclo-III': 'ciclo-III'
         };
         
-        const modulosParaEsteCiclo = moduloKeys[nivelId] || ['ofimatica'];
+        const cicloId = nivelMap[nivelId];
+        const cicloActual = ciclosConfig.ciclos.find(c => c.id === cicloId);
         
-        // 3. Generar HTML para cada módulo
+        if (!cicloActual) {
+            throw new Error(`Ciclo no encontrado: ${cicloId}`);
+        }
+        
+        console.log(`🎯 Ciclo encontrado: ${cicloActual.nombre}`);
+        
+        // 3. Determinar qué módulos mostrar basado en las áreas del ciclo
+        // Mapear áreas a módulos
+        const areaToModulo = {
+            "Apropiación tecnológica y Digital": "ofimatica",
+            "Programación y Algoritmos": "programacion",
+            "Computación física y Robótica": "robotica",
+            "Ciencia de datos e Inteligencia artificial": "inteligencia-artificial",
+            "Redes y Comunicación": "redes"
+        };
+        
+        // Obtener módulos únicos para este ciclo
+        const modulosParaEsteCiclo = [...new Set(
+            cicloActual.areas.map(area => areaToModulo[area]).filter(m => m)
+        )];
+        
+        // Si no hay módulos específicos, usar uno por defecto
+        if (modulosParaEsteCiclo.length === 0) {
+            modulosParaEsteCiclo.push('ofimatica');
+        }
+        
+        console.log(`📚 Módulos para ${cicloActual.nombre}:`, modulosParaEsteCiclo);
+        
+        // 4. Generar HTML para cada módulo
         let htmlModulos = '';
         
         for (const moduloKey of modulosParaEsteCiclo) {
@@ -305,18 +337,20 @@ async function cargarYMostrarModulosReales(nivelId) {
                 htmlModulos += `
                     <div class="modulo-item-real" onclick="abrirRegistroModulo('${moduloKey}', '${nivelId}')">
                         <div class="modulo-icon">
-                            <i class="fas ${moduloKey === 'ofimatica' ? 'fa-file-word' : 
-                                          moduloKey === 'programacion' ? 'fa-code' : 
-                                          'fa-network-wired'}"></i>
+                            <i class="fas ${getModuloIcon(moduloKey)}"></i>
                         </div>
                         <div class="modulo-info">
                             <h5>${moduloData.nombre || moduloKey}</h5>
                             <p>${moduloData.descripcion || 'Módulo de Formación Tecnológica'}</p>
                             <div class="modulo-meta">
-                                <span><i class="fas fa-graduation-cap"></i> ${modulosParaEsteCiclo.length > 1 ? 'Obligatorio' : 'Principal'}</span>
-                                <span><i class="fas fa-percentage"></i> ${nivelId.includes('I') ? '50%' : 
-                                                                        nivelId.includes('II') ? '55%' : 
-                                                                        '60%'} de la nota</span>
+                                <span><i class="fas fa-clock"></i> ${cicloActual.horas_semanales}h/semana</span>
+                                <span><i class="fas fa-book"></i> ${cicloActual.total_horas}h totales</span>
+                                <span><i class="fas fa-graduation-cap"></i> ${getPorcentajeNota(nivelId)}% nota</span>
+                            </div>
+                            <div class="modulo-areas">
+                                ${moduloData.areas ? moduloData.areas.map(area => 
+                                    `<span class="badge-area">${area}</span>`
+                                ).join('') : ''}
                             </div>
                         </div>
                         <button class="btn btn-primary">
@@ -327,48 +361,91 @@ async function cargarYMostrarModulosReales(nivelId) {
             } catch (error) {
                 console.warn(`No se pudo cargar ${moduloKey}.json:`, error);
                 // Módulo de ejemplo si no existe
-                htmlModulos += crearModuloEjemploHTML(moduloKey, nivelId);
+                htmlModulos += crearModuloEjemploHTML(moduloKey, nivelId, cicloActual);
             }
         }
         
-        // 4. Mostrar en la página
-        document.getElementById('modulosLista').innerHTML = htmlModulos || 
-            '<p class="texto-vacio">No hay módulos configurados para este ciclo.</p>';
+        // 5. Mostrar en la página
+        const modulosLista = document.getElementById('modulosLista');
+        if (modulosLista) {
+            modulosLista.innerHTML = htmlModulos || 
+                `<p class="texto-vacio">No hay módulos configurados para ${cicloActual.nombre}.</p>`;
+        }
             
     } catch (error) {
         console.error('Error cargando módulos:', error);
-        document.getElementById('modulosLista').innerHTML = `
-            <div class="error-modulos">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Error cargando módulos. Usando datos de ejemplo.</p>
-                ${crearModuloEjemploHTML('ofimatica', nivelId)}
-            </div>
-        `;
+        const modulosLista = document.getElementById('modulosLista');
+        if (modulosLista) {
+            modulosLista.innerHTML = `
+                <div class="error-modulos">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error cargando módulos: ${error.message}</p>
+                    <p>Usando módulo de ejemplo.</p>
+                    ${crearModuloEjemploHTML('ofimatica', nivelId)}
+                </div>
+            `;
+        }
     }
 }
 
-// AÑADE esta función auxiliar:
-function crearModuloEjemploHTML(moduloKey, nivelId) {
-    const nombres = {
-        'ofimatica': 'Ofimática',
-        'programacion': 'Programación',
-        'redes': 'Redes y Comunicación'
+// AÑADE estas funciones auxiliares DESPUÉS de cargarYMostrarModulosReales:
+
+function getModuloIcon(moduloKey) {
+    const iconos = {
+        'ofimatica': 'fa-file-word',
+        'programacion': 'fa-code',
+        'robotica': 'fa-robot',
+        'redes': 'fa-network-wired',
+        'inteligencia-artificial': 'fa-brain',
+        'ciencia-datos': 'fa-chart-bar'
     };
+    return iconos[moduloKey] || 'fa-book';
+}
+
+function getPorcentajeNota(nivelId) {
+    // Según Art. 6.1.1 MEP
+    if (nivelId.includes('I')) return 50;
+    if (nivelId.includes('II')) return 55;
+    if (nivelId.includes('III')) return 60;
+    return 50;
+}
+
+// REEMPLAZA la función crearModuloEjemploHTML con esta versión actualizada:
+function crearModuloEjemploHTML(moduloKey, nivelId, cicloActual = null) {
+    const nombresModulos = {
+        'ofimatica': 'Ofimática y Herramientas Digitales',
+        'programacion': 'Programación y Algoritmos',
+        'robotica': 'Computación Física y Robótica',
+        'redes': 'Redes y Comunicación Digital',
+        'inteligencia-artificial': 'Inteligencia Artificial'
+    };
+    
+    const nombresCiclos = {
+        'primaria-ciclo-I': 'I Ciclo (1°-3°)',
+        'primaria-ciclo-II': 'II Ciclo (4°-6°)', 
+        'secundaria-ciclo-III': 'III Ciclo (7°-9°)'
+    };
+    
+    const moduloNombre = nombresModulos[moduloKey] || 
+                        moduloKey.charAt(0).toUpperCase() + moduloKey.slice(1);
     
     return `
         <div class="modulo-item-real" onclick="abrirRegistroModulo('${moduloKey}', '${nivelId}')">
             <div class="modulo-icon">
-                <i class="fas ${moduloKey === 'ofimatica' ? 'fa-file-word' : 
-                              moduloKey === 'programacion' ? 'fa-code' : 
-                              'fa-network-wired'}"></i>
+                <i class="fas ${getModuloIcon(moduloKey)}"></i>
             </div>
             <div class="modulo-info">
-                <h5>${nombres[moduloKey] || moduloKey} (Ejemplo)</h5>
-                <p>Módulo de Formación Tecnológica - ${nivelId.includes('I') ? 'I Ciclo' : 
-                                                    nivelId.includes('II') ? 'II Ciclo' : 
-                                                    'III Ciclo'}</p>
+                <h5>${moduloNombre} (Ejemplo)</h5>
+                <p>Módulo de ${nombresCiclos[nivelId] || 'Formación Tecnológica'}</p>
                 <div class="modulo-meta">
-                    <span><i class="fas fa-clock"></i> Carga pendiente</span>
+                    ${cicloActual ? `
+                        <span><i class="fas fa-clock"></i> ${cicloActual.horas_semanales}h/semana</span>
+                        <span><i class="fas fa-book"></i> ${cicloActual.total_horas}h totales</span>
+                    ` : ''}
+                    <span><i class="fas fa-graduation-cap"></i> ${getPorcentajeNota(nivelId)}% de la nota</span>
+                </div>
+                <div class="modulo-areas">
+                    <span class="badge-area">${moduloNombre.split(' ')[0]}</span>
                 </div>
             </div>
             <button class="btn btn-primary">
@@ -684,5 +761,6 @@ window.cargarYMostrarModulosReales = cargarYMostrarModulosReales;
 document.addEventListener('DOMContentLoaded', inicializarSistema);
 
 console.log('🔧 Sistema FT-MEP - Dashboard cargado');
+
 
 
