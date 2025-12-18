@@ -4857,6 +4857,167 @@ body.modal-open {
     gap: 4px;
 }
 
+/* ============================================
+   FIX: ELIMINAR CONTENIDO DUPLICADO Y MEJORAR VISTA
+   ============================================ */
+
+/* 1. Ocultar la estructura vieja que no necesitamos */
+.header, 
+.system-status-bar, 
+.main-layout, 
+.sidebar, 
+.toolbar, 
+.ai-panel,
+.content .view-content {
+    display: none !important;
+}
+
+/* 2. Mostrar solo la estructura nueva */
+.header-sistema,
+.breadcrumb-container,
+.footer-sistema {
+    display: block !important;
+}
+
+/* 3. Asegurar que el contenedor principal esté visible */
+#contenedorPrincipal {
+    display: block !important;
+    width: 100% !important;
+    background: transparent !important;
+    min-height: 0 !important;
+}
+
+/* 4. Ajustar espaciado */
+main.container {
+    min-height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+}
+
+/* 5. Fijar header en la parte superior */
+.header-sistema {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* 6. Ajustar body para header fijo */
+body {
+    padding-top: 120px !important;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    min-height: 100vh !important;
+}
+
+/* 7. Ajustar breadcrumb */
+.breadcrumb-container {
+    margin-top: 20px !important;
+    position: sticky;
+    top: 80px;
+    z-index: 900;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin: 20px auto !important;
+    max-width: 1200px;
+}
+
+/* 8. Ajustar contenedor principal */
+main.container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+}
+
+/* 9. Asegurar que el dashboard sea responsive */
+.dashboard {
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* 10. Mejorar visibilidad del dashboard */
+.seccion-dashboard {
+    background: white !important;
+    border-radius: 15px !important;
+    padding: 25px !important;
+    margin-bottom: 25px !important;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* 11. Ajustar footer */
+.footer-sistema {
+    margin-top: 50px !important;
+    position: relative !important;
+    z-index: 800 !important;
+}
+
+/* 12. Responsive */
+@media (max-width: 768px) {
+    body {
+        padding-top: 160px !important;
+    }
+    
+    .header-sistema {
+        position: relative !important;
+    }
+    
+    .breadcrumb-container {
+        position: relative !important;
+        top: 0 !important;
+        margin-top: 10px !important;
+    }
+    
+    .nav-principal {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    .nav-link {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+    }
+}
+
+/* 13. Mejorar navegación activa */
+.nav-link.active {
+    background: rgba(255,255,255,0.2) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+/* 14. Asegurar que los botones funcionen */
+.nav-link {
+    cursor: pointer !important;
+}
+
+/* 15. Estilo para cuando no hay contenido */
+#contenedorPrincipal:empty::before {
+    content: "Cargando sistema FT-MEP...";
+    display: block;
+    text-align: center;
+    padding: 100px;
+    color: #7f8c8d;
+    font-size: 1.2em;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+
 
 
 
