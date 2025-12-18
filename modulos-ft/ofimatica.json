@@ -1,18 +1,46 @@
 {
-    "nombre": "Apropiación Tecnológica y Digital",
-    "descripcion": "Desarrollo de habilidades digitales básicas y uso de herramientas tecnológicas según lineamientos MEP",
-    "areas": ["Apropiación tecnológica y Digital"],
+    "nombre": "Ofimática Básica",
+    "descripcion": "Manejo de herramientas digitales para el aprendizaje y la productividad",
+    "area": "Herramientas Digitales",
+    "horas": 40,
+    "nivel": "II",
     "indicadores": [
-        "Utiliza procesador de texto para crear documentos formales",
-        "Crea presentaciones digitales con elementos multimedia",
-        "Organiza datos en hojas de cálculo con fórmulas básicas",
-        "Gestiona archivos digitales en diferentes formatos y carpetas",
-        "Aplica normas de seguridad digital en el manejo de información",
-        "Utiliza herramientas colaborativas en línea para trabajo en equipo",
-        "Crea contenidos digitales con propiedad intelectual respetada"
+        {
+            "id": "O1",
+            "descripcion": "Maneja procesador de texto para crear documentos básicos",
+            "niveles": {
+                "3": "Crea documentos con formato complejo automáticamente",
+                "2": "Aplica formatos básicos y guarda correctamente",
+                "1": "Escribe texto sin formato adecuado"
+            }
+        },
+        {
+            "id": "O2",
+            "descripcion": "Utiliza hojas de cálculo para organizar datos simples",
+            "niveles": {
+                "3": "Crea fórmulas básicas y gráficos simples",
+                "2": "Ingresa datos y aplica formato básico",
+                "1": "Reconoce la interfaz pero no organiza datos"
+            }
+        },
+        {
+            "id": "O3",
+            "descripcion": "Crea presentaciones digitales con elementos multimedia",
+            "niveles": {
+                "3": "Incluye multimedia y transiciones apropiadas",
+                "2": "Crea diapositivas con texto e imágenes",
+                "1": "Agrega contenido sin estructura clara"
+            }
+        }
     ],
-    "horas_semanales": 2,
-    "total_horas": 72,
-    "evaluacion": "Trabajo cotidiano, proyectos prácticos y participación",
-    "ciclos": ["ciclo-I", "ciclo-II", "ciclo-III"]
+    "recursos": [
+        "Computadora con suite ofimática",
+        "Guías de uso",
+        "Ejemplos prácticos"
+    ],
+    "evaluacion": {
+        "trabajo_cotidiano": 55,
+        "pruebas_escritas": 30,
+        "proyecto_final": 15
+    }
 }
