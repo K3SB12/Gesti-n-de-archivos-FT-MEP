@@ -1,0 +1,18 @@
+{
+    "nombre": "Computación Física y Robótica",
+    "descripcion": "Introducción a la robótica educativa, sensores y sistemas físicos programables",
+    "areas": ["Computación física y Robótica"],
+    "indicadores": [
+        "Identifica componentes básicos de sistemas robóticos",
+        "Programa movimientos y respuestas a sensores",
+        "Resuelve problemas prácticos con soluciones robóticas",
+        "Diseña prototipos creativos con materiales disponibles",
+        "Presenta proyectos robóticos funcionales y documentados",
+        "Trabaja en equipo respetando roles y responsabilidades",
+        "Aplica principios de mecánica básica en sus diseños"
+    ],
+    "horas_semanales": 1,
+    "total_horas": 36,
+    "evaluacion": "Proyectos de robótica, demostraciones prácticas y diario de diseño",
+    "ciclos": ["ciclo-II", "ciclo-III"]
+}
