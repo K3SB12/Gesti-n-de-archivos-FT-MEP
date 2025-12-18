@@ -8,17 +8,46 @@ let sistemaFT = {
     nivelActual: null
 };
 
+// Limpiar contenido duplicado al inicio
+function limpiarInterfazDuplicada() {
+    console.log('🧹 Limpiando interfaz duplicada...');
+    
+    // Elementos del sistema viejo a ocultar
+    const clasesAOcultar = [
+        '.header', '.system-status-bar', '.main-layout', 
+        '.sidebar', '.toolbar', '.ai-panel', '.view-content'
+    ];
+    
+    clasesAOcultar.forEach(selector => {
+        const elementos = document.querySelectorAll(selector);
+        elementos.forEach(el => {
+            if (el) {
+                el.style.display = 'none';
+            }
+        });
+    });
+    
+    // Asegurar que el body tenga el padding correcto
+    document.body.style.paddingTop = '120px';
+    document.body.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+    
+    console.log('✅ Interfaz limpia');
+}
+
 // Inicializar sistema
 function inicializarSistema() {
     console.log('🚀 Sistema FT-MEP - Dashboard inicializando...');
     
-    // Cargar datos iniciales
+    // 1. Limpiar interfaz duplicada
+    limpiarInterfazDuplicada();
+    
+    // 2. Cargar datos iniciales
     cargarDatosIniciales();
     
-    // Mostrar dashboard por defecto
+    // 3. Mostrar dashboard por defecto
     mostrarDashboard();
     
-    // Configurar navegación
+    // 4. Configurar navegación
     configurarNavegacion();
     
     console.log('✅ Dashboard FT-MEP listo');
@@ -65,7 +94,7 @@ async function cargarDatosIniciales() {
     }
 }
 
-// AÑADE esta función auxiliar para determinar ciclo
+// Función auxiliar para determinar ciclo
 function determinarCiclo(grupo) {
     if (!grupo) return "I";
     const grado = parseInt(grupo.split('-')[0] || grupo.split('°')[0]);
@@ -74,7 +103,8 @@ function determinarCiclo(grupo) {
     if (grado >= 7 && grado <= 9) return "III";
     return "I"; // Por defecto
 }
-// Añade esta función auxiliar AL FINAL de app.js (antes del DOMContentLoaded):
+
+// Función auxiliar para estudiantes de ejemplo
 function obtenerEstudiantesEjemplo() {
     return [
         {id: 1, nombre: "Ana Gómez", cedula: "001234567", ciclo: "I", grupo: "7°A"},
@@ -85,6 +115,18 @@ function obtenerEstudiantesEjemplo() {
     ];
 }
 
+// Actualizar breadcrumb
+function actualizarBreadcrumb(ruta) {
+    const breadcrumb = document.getElementById('breadcrumb');
+    if (breadcrumb) {
+        breadcrumb.innerHTML = `
+            <span class="breadcrumb-item active">
+                <i class="fas fa-home"></i> ${ruta}
+            </span>
+        `;
+    }
+}
+
 // Mostrar dashboard principal
 function mostrarDashboard() {
     const contenedor = document.getElementById('contenedorPrincipal');
@@ -92,6 +134,9 @@ function mostrarDashboard() {
         console.error('❌ No se encontró contenedorPrincipal');
         return;
     }
+    
+    // Actualizar breadcrumb
+    actualizarBreadcrumb('Inicio');
     
     contenedor.innerHTML = `
         <div class="dashboard">
@@ -224,15 +269,16 @@ function mostrarDashboard() {
 }
 
 // Cargar un nivel educativo
-// REEMPLAZA la función cargarNivel COMPLETA:
 async function cargarNivel(nivelId) {
-    sistemaFT.nivelActual = nivelId;
-    
+    // Actualizar breadcrumb
     const nombres = {
-        'primaria-ciclo-I': 'I Ciclo (1°-3°)',
-        'primaria-ciclo-II': 'II Ciclo (4°-6°)', 
-        'secundaria-ciclo-III': 'III Ciclo (7°-9°)'
+        'primaria-ciclo-I': 'I Ciclo',
+        'primaria-ciclo-II': 'II Ciclo', 
+        'secundaria-ciclo-III': 'III Ciclo'
     };
+    actualizarBreadcrumb(nombres[nivelId] || 'Ciclo');
+    
+    sistemaFT.nivelActual = nivelId;
     
     const contenedor = document.getElementById('contenedorPrincipal');
     if (!contenedor) return;
@@ -278,8 +324,7 @@ async function cargarNivel(nivelId) {
     await cargarYMostrarModulosReales(nivelId);
 }
 
-// AÑADE esta NUEVA función:
-// REEMPLAZA LA FUNCIÓN COMPLETA cargarYMostrarModulosReales:
+// Función para cargar y mostrar módulos reales
 async function cargarYMostrarModulosReales(nivelId) {
     try {
         // 1. Cargar configuración de ciclos para saber qué módulos tocan
@@ -388,8 +433,7 @@ async function cargarYMostrarModulosReales(nivelId) {
     }
 }
 
-// AÑADE estas funciones auxiliares DESPUÉS de cargarYMostrarModulosReales:
-
+// Función auxiliar para obtener icono de módulo
 function getModuloIcon(moduloKey) {
     const iconos = {
         'ofimatica': 'fa-file-word',
@@ -402,6 +446,7 @@ function getModuloIcon(moduloKey) {
     return iconos[moduloKey] || 'fa-book';
 }
 
+// Función auxiliar para obtener porcentaje de nota
 function getPorcentajeNota(nivelId) {
     // Según Art. 6.1.1 MEP
     if (nivelId.includes('I')) return 50;
@@ -410,7 +455,7 @@ function getPorcentajeNota(nivelId) {
     return 50;
 }
 
-// REEMPLAZA la función crearModuloEjemploHTML con esta versión actualizada:
+// Función para crear HTML de módulo de ejemplo
 function crearModuloEjemploHTML(moduloKey, nivelId, cicloActual = null) {
     const nombresModulos = {
         'ofimatica': 'Ofimática y Herramientas Digitales',
@@ -455,9 +500,17 @@ function crearModuloEjemploHTML(moduloKey, nivelId, cicloActual = null) {
     `;
 }
 
-// AÑADE esta NUEVA función (después de cargarNivel):
+// Abrir registro de módulo
 async function abrirRegistroModulo(moduloKey, nivelId) {
     console.log(`📝 Abriendo registro para: ${moduloKey} en ${nivelId}`);
+    
+    // Actualizar breadcrumb
+    const nombres = {
+        'primaria-ciclo-I': 'I Ciclo',
+        'primaria-ciclo-II': 'II Ciclo', 
+        'secundaria-ciclo-III': 'III Ciclo'
+    };
+    actualizarBreadcrumb(`${nombres[nivelId] || 'Ciclo'} > ${moduloKey}`);
     
     // 1. Cargar datos del módulo
     let moduloData;
@@ -530,7 +583,7 @@ async function abrirRegistroModulo(moduloKey, nivelId) {
     `;
 }
 
-// AÑADE esta función auxiliar:
+// Generar filas de registro
 function generarFilasRegistro(indicadores) {
     if (sistemaFT.estudiantes.length === 0) {
         return '<div class="fila-vacia">No hay estudiantes cargados</div>';
@@ -617,6 +670,22 @@ function volverDashboard() {
 function configurarNavegacion() {
     console.log('🔧 Configurando navegación...');
     
+    // Limpiar cualquier contenido duplicado
+    const elementosDuplicados = document.querySelectorAll('.header, .system-status-bar, .sidebar, .main-layout, .toolbar');
+    elementosDuplicados.forEach(el => {
+        if (el && el.parentNode) {
+            el.style.display = 'none';
+        }
+    });
+    
+    // Asegurar que los elementos nuevos sean visibles
+    const elementosNecesarios = document.querySelectorAll('.header-sistema, .breadcrumb-container, .footer-sistema');
+    elementosNecesarios.forEach(el => {
+        if (el) {
+            el.style.display = 'block';
+        }
+    });
+    
     // Actualizar enlaces activos
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -626,8 +695,6 @@ function configurarNavegacion() {
         });
     });
 }
-
-// AÑADE al final de app.js (antes de las exportaciones):
 
 // Función para seleccionar nivel en el registro
 function seleccionarNivel(boton, estudianteId, indicadorIdx) {
@@ -646,6 +713,7 @@ function seleccionarNivel(boton, estudianteId, indicadorIdx) {
     console.log(`Registro: Est ${estudianteId}, Indicador ${indicadorIdx}, Nivel ${boton.dataset.nivel}`);
 }
 
+// Calcular parcial para un estudiante
 function calcularParcialEstudiante(estudianteId) {
     const fila = document.querySelector(`.fila-estudiante[data-id="${estudianteId}"]`);
     if (!fila) return;
@@ -716,7 +784,6 @@ function guardarRegistroCotidiano(moduloKey, nivelId) {
     cargarNivel(nivelId);
 }
 
-
 // Funciones de acción
 function gestionarEstudiantes() {
     alert('📋 Gestión de Estudiantes\n\n• Agregar nuevos estudiantes\n• Editar información\n• Asignar a grupos');
@@ -756,11 +823,16 @@ window.seleccionarNivel = seleccionarNivel;
 window.guardarRegistroCotidiano = guardarRegistroCotidiano;
 window.crearModuloEjemploHTML = crearModuloEjemploHTML;
 window.cargarYMostrarModulosReales = cargarYMostrarModulosReales;
+window.determinarCiclo = determinarCiclo;
+window.obtenerEstudiantesEjemplo = obtenerEstudiantesEjemplo;
+window.actualizarBreadcrumb = actualizarBreadcrumb;
+window.limpiarInterfazDuplicada = limpiarInterfazDuplicada;
+window.getModuloIcon = getModuloIcon;
+window.getPorcentajeNota = getPorcentajeNota;
+window.generarFilasRegistro = generarFilasRegistro;
+window.calcularParcialEstudiante = calcularParcialEstudiante;
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', inicializarSistema);
 
 console.log('🔧 Sistema FT-MEP - Dashboard cargado');
-
-
-
