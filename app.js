@@ -19,7 +19,7 @@ function inicializarSistema() {
 // Cargar estudiantes
 async function cargarDatosIniciales() {
     try {
-        const response = await fetch('data/estudiantes.json');
+        const response = await fetch('/Gesti-n-de-archivos-FT-MEP/data/estudiantes.json');
         const data = await response.json();
         
         sistemaFT.estudiantes = data.map(est => ({
@@ -320,3 +320,4 @@ window.calcularNotas = calcularNotas;
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', inicializarSistema);
+
