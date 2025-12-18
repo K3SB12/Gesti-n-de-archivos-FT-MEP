@@ -1,98 +1,18 @@
 {
-  "id": "ofimatica",
-  "nombre": "Ofimática Aplicada",
-  "descripcion": "Módulo especializado en el uso de herramientas ofimáticas para la productividad digital",
-  "ciclo": "III",
-  "horas": 40,
-  "competencia_global": "Utiliza herramientas ofimáticas para crear, editar y gestionar documentos digitales que respondan a necesidades específicas en contextos educativos y laborales.",
-  "indicadores": [
-    {
-      "id": "ofi-001",
-      "texto": "Crea documentos de texto aplicando formatos básicos y avanzados para comunicar información de manera efectiva",
-      "nivel": "III",
-      "criterios": {
-        "alto": {
-          "puntuacion": 3,
-          "descripcion": "Crea documentos complejos con formato avanzado, estilos personalizados, índices automáticos y elementos multimedia integrados de manera coherente"
-        },
-        "medio": {
-          "puntuacion": 2,
-          "descripcion": "Crea documentos estructurados con formatos básicos, incluyendo títulos, párrafos, listas y elementos visuales simples"
-        },
-        "bajo": {
-          "puntuacion": 1,
-          "descripcion": "Crea documentos simples con formato básico, presentando dificultades en la organización y presentación de la información"
-        }
-      }
-    },
-    {
-      "id": "ofi-002",
-      "texto": "Utiliza hojas de cálculo para organizar, analizar y visualizar datos mediante fórmulas, funciones y gráficos",
-      "nivel": "III",
-      "criterios": {
-        "alto": {
-          "puntuacion": 3,
-          "descripcion": "Aplica fórmulas complejas, funciones avanzadas y crea gráficos dinámicos para analizar y presentar datos de manera profesional"
-        },
-        "medio": {
-          "puntuacion": 2,
-          "descripcion": "Utiliza fórmulas básicas, funciones comunes y crea gráficos simples para organizar y presentar datos"
-        },
-        "bajo": {
-          "puntuacion": 1,
-          "descripcion": "Ingresa datos en celdas sin aplicar fórmulas o formatos especiales, mostrando dificultades en el manejo básico"
-        }
-      }
-    },
-    {
-      "id": "ofi-003",
-      "texto": "Diseña presentaciones digitales efectivas integrando elementos multimedia y principios de diseño",
-      "nivel": "III",
-      "criterios": {
-        "alto": {
-          "puntuacion": 3,
-          "descripcion": "Crea presentaciones profesionales con diseño coherente, animaciones personalizadas, elementos multimedia integrados y transiciones efectivas"
-        },
-        "medio": {
-          "puntuacion": 2,
-          "descripcion": "Diseña presentaciones básicas con estructura clara, incluyendo textos, imágenes y transiciones simples"
-        },
-        "bajo": {
-          "puntuacion": 1,
-          "descripcion": "Crea diapositivas simples con contenido básico, presentando dificultades en la organización y diseño"
-        }
-      }
-    },
-    {
-      "id": "ofi-004",
-      "texto": "Gestiona información en bases de datos simples para organizar y recuperar datos de manera eficiente",
-      "nivel": "III",
-      "criterios": {
-        "alto": {
-          "puntuacion": 3,
-          "descripcion": "Diseña bases de datos relacionales, crea consultas complejas, formularios personalizados y reportes automatizados"
-        },
-        "medio": {
-          "puntuacion": 2,
-          "descripcion": "Crea tablas básicas, realiza consultas simples y genera reportes estándar para organizar información"
-        },
-        "bajo": {
-          "puntuacion": 1,
-          "descripcion": "Ingresa datos en tablas predefinidas, mostrando dificultades en la organización y recuperación de información"
-        }
-      }
-    }
-  ],
-  "recursos": [
-    "Computadoras con suite ofimática",
-    "Guías de trabajo prácticas",
-    "Plantillas de documentos",
-    "Ejemplos de proyectos reales",
-    "Videos tutoriales"
-  ],
-  "evaluacion": {
-    "trabajo_cotidiano": "Ejercicios prácticos en clase",
-    "proyecto_final": "Portafolio digital con productos de cada herramienta",
-    "criterios": ["Funcionalidad", "Creatividad", "Organización", "Presentación"]
-  }
+    "nombre": "Apropiación Tecnológica y Digital",
+    "descripcion": "Desarrollo de habilidades digitales básicas y uso de herramientas tecnológicas según lineamientos MEP",
+    "areas": ["Apropiación tecnológica y Digital"],
+    "indicadores": [
+        "Utiliza procesador de texto para crear documentos formales",
+        "Crea presentaciones digitales con elementos multimedia",
+        "Organiza datos en hojas de cálculo con fórmulas básicas",
+        "Gestiona archivos digitales en diferentes formatos y carpetas",
+        "Aplica normas de seguridad digital en el manejo de información",
+        "Utiliza herramientas colaborativas en línea para trabajo en equipo",
+        "Crea contenidos digitales con propiedad intelectual respetada"
+    ],
+    "horas_semanales": 2,
+    "total_horas": 72,
+    "evaluacion": "Trabajo cotidiano, proyectos prácticos y participación",
+    "ciclos": ["ciclo-I", "ciclo-II", "ciclo-III"]
 }
