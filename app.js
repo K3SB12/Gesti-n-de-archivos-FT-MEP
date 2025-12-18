@@ -25,15 +25,12 @@ function inicializarSistema() {
 }
 
 // Cargar datos iniciales
-// REEMPLAZA la función cargarDatosIniciales() completa:
 async function cargarDatosIniciales() {
     try {
         console.log('📥 Cargando datos MEP...');
         
-        // Opción 1: Si la ruta necesita ./
+        // Cargar estudiantes.json
         const response = await fetch('./data/estudiantes.json');
-        // Opción 2: Si la ruta es correcta
-        // const response = await fetch('data/estudiantes.json');
         
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
@@ -42,16 +39,21 @@ async function cargarDatosIniciales() {
         const data = await response.json();
         console.log('📄 Datos crudos recibidos:', data);
         
-        // Dependiendo de la estructura REAL de tu archivo:
-        if (data.estudiantes && Array.isArray(data.estudiantes)) {
-            sistemaFT.estudiantes = data.estudiantes;
-            console.log(`👥 ${sistemaFT.estudiantes.length} estudiantes cargados (estructura: data.estudiantes)`);
-        } 
-        else if (Array.isArray(data)) {
-            sistemaFT.estudiantes = data;
-            console.log(`👥 ${sistemaFT.estudiantes.length} estudiantes cargados (estructura: array directo)`);
-        }
-        else {
+        // Tu archivo es un array directo, no un objeto con propiedad "estudiantes"
+        if (Array.isArray(data)) {
+            // Transformar tus datos a la estructura que espera el sistema
+            sistemaFT.estudiantes = data.map(est => ({
+                id: est.id,
+                nombre: est.nombre,
+                cedula: est.codigo || est.id,  // Usar código como cédula
+                grupo: est.grupo || "4-A",
+                ciclo: determinarCiclo(est.grupo), // Determinar ciclo del grupo
+                necesidades: est.necesidades || [],
+                asistencia: est.asistencia || 0,
+                notaPeriodoAnterior: est.notaPeriodoAnterior || 0
+            }));
+            console.log(`👥 ${sistemaFT.estudiantes.length} estudiantes transformados`);
+        } else {
             console.warn('❌ Estructura desconocida, usando datos de ejemplo');
             sistemaFT.estudiantes = obtenerEstudiantesEjemplo();
         }
@@ -63,6 +65,15 @@ async function cargarDatosIniciales() {
     }
 }
 
+// AÑADE esta función auxiliar para determinar ciclo
+function determinarCiclo(grupo) {
+    if (!grupo) return "I";
+    const grado = parseInt(grupo.split('-')[0] || grupo.split('°')[0]);
+    if (grado >= 1 && grado <= 3) return "I";
+    if (grado >= 4 && grado <= 6) return "II";
+    if (grado >= 7 && grado <= 9) return "III";
+    return "I"; // Por defecto
+}
 // Añade esta función auxiliar AL FINAL de app.js (antes del DOMContentLoaded):
 function obtenerEstudiantesEjemplo() {
     return [
@@ -448,34 +459,75 @@ function generarFilasRegistro(indicadores) {
         return '<div class="fila-vacia">No hay estudiantes cargados</div>';
     }
     
-    return sistemaFT.estudiantes.map(est => `
+    return sistemaFT.estudiantes.map(est => {
+        // Verificar necesidades especiales
+        const tieneNecesidades = est.necesidades && est.necesidades.length > 0;
+        const necesidadTexto = tieneNecesidades ? est.necesidades[0] : '';
+        
+        // Verificar asistencia (color según porcentaje)
+        const asistenciaColor = est.asistencia >= 90 ? 'alta' : 
+                               est.asistencia >= 75 ? 'media' : 'baja';
+        
+        // Verificar nota anterior
+        const notaAnterior = est.notaPeriodoAnterior || 0;
+        const notaColor = notaAnterior >= 70 ? 'alta' : 
+                         notaAnterior >= 50 ? 'media' : 'baja';
+        
+        return `
         <div class="fila-estudiante" data-id="${est.id}">
             <div class="col-estudiante">
-                <div class="estudiante-nombre">${est.nombre || 'Estudiante ' + est.id}</div>
-                <div class="estudiante-info">${est.cedula || ''} ${est.grupo || ''}</div>
+                <div class="estudiante-nombre">
+                    ${est.nombre || 'Estudiante ' + est.id}
+                    ${tieneNecesidades ? '<span class="badge-necesidad">' + necesidadTexto + '</span>' : ''}
+                </div>
+                <div class="estudiante-info">
+                    <div class="estudiante-meta">
+                        <span class="meta-item" title="Cédula/ID">
+                            <i class="fas fa-id-card"></i> ${est.cedula || est.id}
+                        </span>
+                        <span class="meta-item" title="Grupo">
+                            <i class="fas fa-users"></i> ${est.grupo || 'Sin grupo'}
+                        </span>
+                    </div>
+                    <div class="estudiante-estadisticas">
+                        <span class="estadistica-item asistencia-${asistenciaColor}" title="Asistencia">
+                            <i class="fas fa-calendar-check"></i> ${est.asistencia || 0}%
+                        </span>
+                        <span class="estadistica-item nota-${notaColor}" title="Nota periodo anterior">
+                            <i class="fas fa-chart-line"></i> ${notaAnterior}
+                        </span>
+                    </div>
+                </div>
             </div>
             
             ${indicadores.map((ind, idx) => `
                 <div class="col-indicador">
                     <div class="niveles-logro">
-                        <button class="btn-nivel ${idx === 0 ? 'activo' : ''}" data-nivel="3" onclick="seleccionarNivel(this, ${est.id}, ${idx})">
-                            Alto
+                        <button class="btn-nivel" data-nivel="3" onclick="seleccionarNivel(this, '${est.id}', ${idx})">
+                            <i class="fas fa-star"></i> Alto
                         </button>
-                        <button class="btn-nivel ${idx === 1 ? 'activo' : ''}" data-nivel="2" onclick="seleccionarNivel(this, ${est.id}, ${idx})">
-                            Medio
+                        <button class="btn-nivel" data-nivel="2" onclick="seleccionarNivel(this, '${est.id}', ${idx})">
+                            <i class="fas fa-star-half-alt"></i> Medio
                         </button>
-                        <button class="btn-nivel ${idx === 2 ? 'activo' : ''}" data-nivel="1" onclick="seleccionarNivel(this, ${est.id}, ${idx})">
-                            Bajo
+                        <button class="btn-nivel" data-nivel="1" onclick="seleccionarNivel(this, '${est.id}', ${idx})">
+                            <i class="far fa-star"></i> Bajo
                         </button>
+                    </div>
+                    <div class="indicador-descripcion">
+                        <small>${ind}</small>
                     </div>
                 </div>
             `).join('')}
             
             <div class="col-total">
                 <span class="total-parcial">0%</span>
+                <div class="total-etiqueta">
+                    <small>Parcial</small>
+                </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
     
 // Volver al dashboard
@@ -517,19 +569,26 @@ function seleccionarNivel(boton, estudianteId, indicadorIdx) {
     console.log(`Registro: Est ${estudianteId}, Indicador ${indicadorIdx}, Nivel ${boton.dataset.nivel}`);
 }
 
-// Calcular parcial para un estudiante
 function calcularParcialEstudiante(estudianteId) {
-    // Esta función calcularía el % basado en niveles seleccionados
     const fila = document.querySelector(`.fila-estudiante[data-id="${estudianteId}"]`);
     if (!fila) return;
     
-    // Ejemplo simple: contar niveles seleccionados
-    const nivelesSeleccionados = fila.querySelectorAll('.btn-nivel.activo').length;
+    // Calcular puntaje total
+    let puntajeTotal = 0;
+    const botonesNivel = fila.querySelectorAll('.btn-nivel.activo');
+    
+    botonesNivel.forEach(boton => {
+        puntajeTotal += parseInt(boton.dataset.nivel) || 0;
+    });
+    
+    // Máximo posible: 3 puntos por indicador
     const totalIndicadores = fila.querySelectorAll('.col-indicador').length;
+    const maximoPosible = totalIndicadores * 3;
     
-    const porcentaje = totalIndicadores > 0 ? 
-        Math.round((nivelesSeleccionados / totalIndicadores) * 100) : 0;
+    const porcentaje = maximoPosible > 0 ? 
+        Math.round((puntajeTotal / maximoPosible) * 100) : 0;
     
+    // Actualizar visualización
     const totalSpan = fila.querySelector('.total-parcial');
     if (totalSpan) {
         totalSpan.textContent = `${porcentaje}%`;
@@ -625,4 +684,5 @@ window.cargarYMostrarModulosReales = cargarYMostrarModulosReales;
 document.addEventListener('DOMContentLoaded', inicializarSistema);
 
 console.log('🔧 Sistema FT-MEP - Dashboard cargado');
+
 
