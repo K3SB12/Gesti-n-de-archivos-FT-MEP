@@ -1,0 +1,18 @@
+{
+    "nombre": "Ciencia de Datos e Inteligencia Artificial",
+    "descripcion": "Introducción a conceptos básicos de IA, análisis de datos y aplicaciones éticas",
+    "areas": ["Ciencia de datos e Inteligencia artificial"],
+    "indicadores": [
+        "Reconoce aplicaciones cotidianas de inteligencia artificial",
+        "Recopila, organiza y clasifica datos de diversas fuentes",
+        "Interpreta visualizaciones de datos y gráficos estadísticos",
+        "Comprende conceptos básicos de aprendizaje automático",
+        "Analiza problemas con enfoque basado en datos",
+        "Evalúa críticamente el uso ético de la IA",
+        "Propone soluciones creativas usando herramientas de IA"
+    ],
+    "horas_semanales": 1,
+    "total_horas": 36,
+    "evaluacion": "Análisis de casos, proyectos de datos y reflexiones éticas",
+    "ciclos": ["ciclo-III"]
+}
