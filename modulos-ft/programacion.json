@@ -1,79 +1,18 @@
 {
-  "id": "programacion",
-  "nombre": "Programación Creativa",
-  "descripcion": "Módulo de introducción al pensamiento computacional y programación básica",
-  "ciclo": "III",
-  "horas": 40,
-  "competencia_global": "Desarrolla soluciones computacionales simples aplicando principios de programación y pensamiento lógico para resolver problemas en contextos diversos.",
-  "indicadores": [
-    {
-      "id": "prog-001",
-      "texto": "Aplica principios de pensamiento computacional para descomponer problemas en pasos lógicos",
-      "nivel": "III",
-      "criterios": {
-        "alto": {
-          "puntuacion": 3,
-          "descripcion": "Descompone problemas complejos en algoritmos eficientes, identifica patrones y generaliza soluciones"
-        },
-        "medio": {
-          "puntuacion": 2,
-          "descripcion": "Divide problemas simples en pasos secuenciales básicos siguiendo instrucciones guiadas"
-        },
-        "bajo": {
-          "puntuacion": 1,
-          "descripcion": "Sigue instrucciones paso a paso con supervisión constante, mostrando dificultades en la descomposición de problemas"
-        }
-      }
-    },
-    {
-      "id": "prog-002",
-      "texto": "Crea programas simples utilizando lenguajes de programación visual o textual",
-      "nivel": "III",
-      "criterios": {
-        "alto": {
-          "puntuacion": 3,
-          "descripcion": "Desarrolla programas funcionales con estructuras complejas, manejo de eventos y depuración autónoma de errores"
-        },
-        "medio": {
-          "puntuacion": 2,
-          "descripcion": "Implementa programas básicos siguiendo ejemplos, con estructuras simples y corrección de errores con apoyo"
-        },
-        "bajo": {
-          "puntuacion": 1,
-          "descripcion": "Modifica programas existentes con cambios mínimos, requiriendo supervisión constante"
-        }
-      }
-    },
-    {
-      "id": "prog-003",
-      "texto": "Diseña interfaces simples aplicando principios básicos de usabilidad y experiencia de usuario",
-      "nivel": "III",
-      "criterios": {
-        "alto": {
-          "puntuacion": 3,
-          "descripcion": "Crea interfaces intuitivas y atractivas, considerando principios de diseño, accesibilidad y experiencia de usuario"
-        },
-        "medio": {
-          "puntuacion": 2,
-          "descripcion": "Diseña interfaces funcionales con disposición básica de elementos y navegación simple"
-        },
-        "bajo": {
-          "puntuacion": 1,
-          "descripcion": "Organiza elementos en pantalla de manera básica, con dificultades en la distribución espacial"
-        }
-      }
-    }
-  ],
-  "recursos": [
-    "Entornos de programación visual (Scratch, Blockly)",
-    "Editores de texto para programación",
-    "Guías de proyectos paso a paso",
-    "Ejemplos de código comentado",
-    "Simuladores en línea"
-  ],
-  "evaluacion": {
-    "trabajo_cotidiano": "Ejercicios de programación progresivos",
-    "proyecto_final": "Aplicación funcional o juego educativo",
-    "criterios": ["Lógica", "Funcionalidad", "Creatividad", "Documentación"]
-  }
+    "nombre": "Programación y Algoritmos",
+    "descripcion": "Desarrollo del pensamiento computacional a través de la programación creativa y estructurada",
+    "areas": ["Programación y Algoritmos"],
+    "indicadores": [
+        "Diseña algoritmos para resolver problemas cotidianos",
+        "Implementa programas con estructuras secuenciales y condicionales",
+        "Utiliza ciclos y repeticiones en soluciones algorítmicas",
+        "Depura y prueba programas identificando errores comunes",
+        "Trabaja colaborativamente en proyectos de programación",
+        "Documenta código y procesos de desarrollo",
+        "Aplica principios de diseño de interfaces simples"
+    ],
+    "horas_semanales": 2,
+    "total_horas": 72,
+    "evaluacion": "Proyectos prácticos, ejercicios algorítmicos y presentaciones",
+    "ciclos": ["ciclo-I", "ciclo-II", "ciclo-III"]
 }
