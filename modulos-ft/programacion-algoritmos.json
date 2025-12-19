@@ -1,0 +1,134 @@
+{
+  "nombre": "Programación y Algoritmos",
+  "descripcion": "Desarrollo del pensamiento computacional mediante la creación de algoritmos, uso de estructuras de programación y resolución de problemas de forma lógica y estructurada.",
+  "icono": "fa-code",
+  "resultados_aprendizaje": {
+    "Materno Infantil/Transición": "Ordena secuencias integrando conceptos de programación como dato, evento, estado, ciclos, así como nociones de lateralidad y orientación espacial, en la solución de desafíos propuestos, utilizando la programación iconográfica por bloques.",
+    "I Ciclo": "Selecciona conceptos de programación como dato, secuencia, evento, estado, variables, operadores aritméticos y relacionales, condicionales simples, ciclo finito e infinito, en la programación por bloques para la solución de problemas.",
+    "II Ciclo": "Crea algoritmos que integran los conceptos de programación como secuencia, evento, estructuras de control (condicionales simples y ciclos), en la solución a problemas del contexto mediante la programación por bloques.",
+    "III Ciclo": "Desarrolla programas que implementan algoritmos complejos utilizando estructuras de control, operadores lógicos y manejo de datos, para resolver problemas del entorno aplicando buenas prácticas de programación."
+  },
+  "contenidos": {
+    "materno": {
+      "Módulo 1": [
+        {
+          "saber": "Entorno de programación iconográfico",
+          "indicador": "Reconocer el entorno de programación iconográfico, interactuando con bloques de la interfaz, como desplazamiento, apariencia o sonido, mediante el uso guiado del docente.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Navega de forma autónoma en el entorno iconográfico, identifica y selecciona bloques de diferentes categorías (movimiento, apariencia) para arrastrarlos al área de trabajo, mostrando comprensión de su función general.",
+              "evidencia_tipica": "Ensambla una secuencia simple de 2-3 bloques por iniciativa propia para lograr un efecto visible (ej: mover y hacer sonido)."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce el área de bloques y el área de trabajo. Selecciona y arrastra bloques específicos cuando el docente lo indica paso a paso, aunque puede necesitar ayuda para encontrarlos.",
+              "evidencia_tipica": "Completa una secuencia pre-iniciada por el docente siguiendo instrucciones verbales precisas."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Requiere ayuda física o guía constante para interactuar con la interfaz. Confunde las áreas o no logra realizar la acción de arrastrar y soltar bloques de manera efectiva.",
+              "evidencia_tipica": "Señala elementos cuando se le pide, pero no logra ensamblar bloques de forma independiente."
+            }
+          }
+        },
+        {
+          "saber": "Lateralidad y orientación espacial",
+          "indicador": "Reconocer los conceptos de lateralidad y orientación espacial en la construcción de secuencias de acciones para la solución de retos de programación.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Aplica correctamente conceptos como izquierda, derecha, arriba, abajo al dar instrucciones a un personaje digital o a un compañero. Resuelve retos que requieren secuencias con cambios de dirección.",
+              "evidencia_tipica": "Guía a un personaje por un laberinto simple usando comandos de dirección correctos de forma verbal o con bloques."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce y usa los términos de lateralidad y orientación, pero a veces se confunde (ej: invierte izquierda/derecha). Sigue secuencias dadas por el docente para resolver retos.",
+              "evidencia_tipica": "Completa un camino marcado previamente, cometiendo 1-2 errores de dirección que corrige con ayuda."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Muestra dificultad para distinguir conceptos espaciales básicos. Necesita referentes físicos (su propia mano, una marca) y apoyo constante para seguir instrucciones direccionales.",
+              "evidencia_tipica": "Se pierde en secuencias muy simples y requiere que se le muestre físicamente la dirección a seguir."
+            }
+          }
+        }
+      ]
+    },
+    "1": {
+      "Módulo 1": [
+        {
+          "saber": "Algoritmo",
+          "indicador": "Identificar un algoritmo en situaciones de la vida diaria, reconociendo secuencias lógicas y ordenadas de acciones, para ser representadas de forma analógica (dibujos, tarjetas, gestos) y/o digital (entorno iconográfico).",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica algoritmos en actividades cotidianas (como cepillarse los dientes) y los desglosa en una secuencia ordenada y lógica de al menos 4 pasos. Puede representarlos con dibujos o bloques digitales de forma clara.",
+              "evidencia_tipica": "Cartel o secuencia dibujada que detalla los pasos de una rutina diaria en el orden correcto."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce actividades que son algoritmos y enumera algunos pasos, pero el orden puede ser parcialmente incorrecto o faltan pasos clave. La representación es básica.",
+              "evidencia_tipica": "Lista de pasos para una actividad, donde 1 o 2 están desordenados u omitidos."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Le cuesta distinguir una secuencia ordenada de una descripción general. Los pasos que identifica son desorganizados, inconexos o muy vagos.",
+              "evidencia_tipica": "Dibujo o descripción que no muestra una progresión lógica de acciones."
+            }
+          }
+        }
+      ]
+    },
+    "4": {
+      "Módulo 1": [
+        {
+          "saber": "Estructuras repetitivas",
+          "indicador": "Utilizar estructuras repetitivas en pseudocódigo o programación por bloques, resolviendo ejercicios que requieran repeticiones controladas.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica cuándo usar un ciclo (ej: 'repetir 4 veces'). Implementa correctamente estructuras repetitivas en bloques o pseudocódigo para resolver un problema, definiendo el número adecuado de repeticiones.",
+              "evidencia_tipica": "Programa un cuadrado con un bloque 'repetir 4' para los movimientos y giros, o escribe un pseudocódigo con un bucle correcto."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Utiliza un bloque de repetición cuando se le indica, pero puede equivocarse en el número de veces o colocarlo en el lugar incorrecto de la secuencia. Comprende la idea pero la aplicación es imperfecta.",
+              "evidencia_tipica": "Logra la repetición, pero el resultado final es incorrecto porque el contenido del ciclo no está bien estructurado."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "No identifica la necesidad de un ciclo y escribe o arrastra la misma instrucción múltiples veces de forma redundante. No comprende la función de la estructura repetitiva.",
+              "evidencia_tipica": "Crea una secuencia larga y repetitiva manualmente en lugar de usar un bloque 'repetir'."
+            }
+          }
+        }
+      ]
+    },
+    "7": {
+      "Módulo 1": [
+        {
+          "saber": "Estructuras condicionales",
+          "indicador": "Aplicar estructuras condicionales en un entorno de programación para la resolución de desafíos que requieran la toma de decisiones lógicas.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Diseña e implementa condicionales ('si-entonces' o 'si-entonces-si no') que respondan a condiciones compuestas del problema. La lógica es correcta y maneja los casos esperados.",
+              "evidencia_tipica": "Programa un personaje que reacciona de forma diferente al tocar dos colores distintos, usando bloques condicionales anidados correctamente."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Utiliza una estructura condicional simple ('si-entonces') para un caso claro, pero puede no contemplar todas las condiciones del problema o la colocación del bloque afecta el flujo del programa.",
+              "evidencia_tipica": "Implementa una condición, pero el programa no se comporta como se espera en todos los escenarios porque falta un caso."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Confunde la estructura condicional con una secuencia lineal. No logra plantear la condición o la acción asociada de manera relevante al problema.",
+              "evidencia_tipica": "Coloca un bloque 'si' pero la condición está vacía o la acción no está relacionada, o no usa condicionales cuando son necesarios."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
