@@ -3,188 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FT-MEP Sprint 2 Corregido - Evaluación Integral</title>
-    <link rel="stylesheet" href="style-sprint2-corregido.css">
+    <title>Sistema FT-MEP - Sprint 2</title>
+    <link rel="stylesheet" href="style-sprint2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="assets/icons/ft-favicon.ico">
-    
-    <style>
-        /* Estilos de carga inicial */
-        .carga-inicial {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: white;
-        }
-        
-        .carga-logo {
-            font-size: 3em;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        
-        .carga-texto {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-        }
-        
-        .carga-bar {
-            width: 300px;
-            height: 6px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        
-        .carga-progreso {
-            height: 100%;
-            background: #2ecc71;
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-    </style>
 </head>
 <body>
-
-    <!-- Pantalla de carga -->
-    <div id="pantallaCarga" class="carga-inicial">
-        <div class="carga-logo">
-            <i class="fas fa-laptop-code"></i>
-        </div>
-        <div class="carga-texto">
-            Inicializando Sistema FT-MEP Sprint 2...
-        </div>
-        <div class="carga-bar">
-            <div class="carga-progreso" id="progresoCarga"></div>
-        </div>
-    </div>
-
-    <!-- Header del Sistema -->
-    <header class="header-sistema">
-        <div class="container">
-            <div class="logo-header">
-                <h1><i class="fas fa-laptop-code"></i> FT-MEP <span class="version-badge">Sprint 2 Corregido</span></h1>
-                <p class="subtitulo-header">Evaluación Integral - MEP Costa Rica</p>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo">
+                    <i class="fas fa-laptop-code"></i>
+                    <div>
+                        <h1>Sistema FT-MEP</h1>
+                        <p>Evaluación Integral - Formación Tecnológica</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <span id="current-period">Período: Semana 1</span>
+                    <button id="change-period" class="btn-secondary">
+                        <i class="fas fa-calendar-alt"></i> Cambiar
+                    </button>
+                </div>
             </div>
             
-            <!-- Navegación Principal -->
-            <nav class="nav-principal">
-                <a href="#" onclick="mostrarDashboardCompleto()" class="nav-link active">
-                    <i class="fas fa-home"></i> Inicio
-                </a>
-                <a href="#" onclick="seleccionarCiclo('I')" class="nav-link">
-                    <i class="fas fa-child"></i> I Ciclo
-                </a>
-                <a href="#" onclick="seleccionarCiclo('II')" class="nav-link">
-                    <i class="fas fa-user-graduate"></i> II Ciclo
-                </a>
-                <a href="#" onclick="seleccionarCiclo('III')" class="nav-link">
-                    <i class="fas fa-graduation-cap"></i> III Ciclo
-                </a>
-                <div class="nav-actions">
-                    <button class="btn btn-sm btn-primary" onclick="calcularNotaFinal()">
+            <nav class="main-nav">
+                <div class="nav-section">
+                    <button class="nav-btn active" data-section="dashboard">
+                        <i class="fas fa-home"></i> Dashboard
+                    </button>
+                    <button class="nav-btn" data-section="trabajo-cotidiano">
+                        <i class="fas fa-clipboard-check"></i> Trabajo Cotidiano
+                    </button>
+                    <button class="nav-btn" data-section="tareas">
+                        <i class="fas fa-tasks"></i> Tareas (10%)
+                    </button>
+                    <button class="nav-btn" data-section="proyecto-prueba">
+                        <i class="fas fa-project-diagram"></i> Proyecto/Prueba
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <button class="nav-btn" data-section="asistencia">
+                        <i class="fas fa-user-check"></i> Asistencia (10%)
+                    </button>
+                    <button class="nav-btn" data-section="nota-final">
                         <i class="fas fa-calculator"></i> Nota Final
                     </button>
-                    <button class="btn btn-sm btn-outline" onclick="abrirCalculadoraMEP()">
-                        <i class="fas fa-calculator"></i> Calculadora
+                    <button class="nav-btn" data-section="comunicacion">
+                        <i class="fas fa-comments"></i> Comunicación
                     </button>
                 </div>
             </nav>
-        </div>
-    </header>
+        </header>
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb-container">
-        <div class="container">
-            <div id="breadcrumb">
-                <span class="breadcrumb-item active">
-                    <i class="fas fa-home"></i> Inicio
-                </span>
-            </div>
+        <!-- Ciclo Selector -->
+        <div class="cycle-selector">
+            <button class="cycle-btn" data-cycle="I">I Ciclo (1°-3°)</button>
+            <button class="cycle-btn" data-cycle="II">II Ciclo (4°-6°)</button>
+            <button class="cycle-btn active" data-cycle="III">III Ciclo (7°-9°)</button>
         </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="dashboard-grid">
+                    <!-- Resumen del Grupo -->
+                    <div class="card summary-card">
+                        <h3><i class="fas fa-users"></i> Resumen del Grupo</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-value" id="total-students">0</span>
+                                <span class="stat-label">Estudiantes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="avg-grade">0.00</span>
+                                <span class="stat-label">Promedio General</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="attendance-rate">0%</span>
+                                <span class="stat-label">Asistencia</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="tasks-completed">0%</span>
+                                <span class="stat-label">Tareas Completadas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones Rápidas -->
+                    <div class="card quick-actions-card">
+                        <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                        <div class="quick-actions">
+                            <button class="quick-btn" data-action="new-task">
+                                <i class="fas fa-plus-circle"></i> Nueva Tarea
+                            </button>
+                            <button class="quick-btn" data-action="mark-attendance">
+                                <i class="fas fa-user-check"></i> Tomar Asistencia
+                            </button>
+                            <button class="quick-btn" data-action="evaluate-tc">
+                                <i class="fas fa-clipboard-check"></i> Evaluar TC
+                            </button>
+                            <button class="quick-btn" data-action="view-reports">
+                                <i class="fas fa-chart-bar"></i> Ver Reportes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Componentes de Evaluación -->
+                    <div class="card components-card">
+                        <h3><i class="fas fa-puzzle-piece"></i> Componentes de Evaluación</h3>
+                        <div class="components-list" id="components-list">
+                            <!-- Se llena dinámicamente según el ciclo -->
+                        </div>
+                    </div>
+
+                    <!-- Próximas Evaluaciones -->
+                    <div class="card evaluations-card">
+                        <h3><i class="fas fa-calendar-check"></i> Próximas Evaluaciones</h3>
+                        <div class="evaluations-list" id="evaluations-list">
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-plus"></i>
+                                <p>No hay evaluaciones programadas</p>
+                                <button class="btn-secondary">Programar Evaluación</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notificaciones -->
+                    <div class="card notifications-card">
+                        <h3><i class="fas fa-bell"></i> Notificaciones</h3>
+                        <div class="notifications" id="notifications">
+                            <div class="notification-item">
+                                <i class="fas fa-info-circle info"></i>
+                                <span>Bienvenido al Sistema FT-MEP Sprint 2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Trabajo Cotidiano Section -->
+            <section id="trabajo-cotidiano" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-clipboard-check"></i> Trabajo Cotidiano</h2>
+                    <div class="section-actions">
+                        <div class="area-selector">
+                            <label for="area-select">Área:</label>
+                            <select id="area-select" class="form-select">
+                                <option value="">Seleccionar área...</option>
+                                <option value="apropiacion">Apropiación tecnológica y digital</option>
+                                <option value="programacion">Programación y Algoritmos</option>
+                                <option value="computacion">Computación física y Robótica</option>
+                                <option value="ciencia">Ciencia de datos e Inteligencia artificial</option>
+                            </select>
+                        </div>
+                        <button id="save-tc" class="btn-primary">
+                            <i class="fas fa-save"></i> Guardar Evaluación
+                        </button>
+                    </div>
+                </div>
+                <div id="tc-container">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Seleccione un área para cargar los indicadores</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tareas Section -->
+            <section id="tareas" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-tasks"></i> Sistema de Tareas (10%)</h2>
+                    <button id="new-task-btn" class="btn-primary">
+                        <i class="fas fa-plus"></i> Nueva Tarea
+                    </button>
+                </div>
+                <div id="tareas-container">
+                    <!-- Se carga dinámicamente desde modulo-tareas.js -->
+                </div>
+            </section>
+
+            <!-- Proyecto/Prueba Section -->
+            <section id="proyecto-prueba" class="content-section">
+                <div class="section-header">
+                    <h2 id="proyecto-title">
+                        <i class="fas fa-project-diagram"></i> Proyecto III Ciclo (30%)
+                    </h2>
+                    <div id="proyecto-actions">
+                        <!-- Se carga dinámicamente según el ciclo -->
+                    </div>
+                </div>
+                <div id="proyecto-container">
+                    <!-- Se carga dinámicamente -->
+                </div>
+            </section>
+
+            <!-- Asistencia Section -->
+            <section id="asistencia" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-check"></i> Asistencia (10%)</h2>
+                    <div class="date-selector">
+                        <input type="date" id="attendance-date" class="form-input">
+                        <button id="mark-attendance-btn" class="btn-primary">
+                            <i class="fas fa-check"></i> Registrar Asistencia
+                        </button>
+                    </div>
+                </div>
+                <div id="asistencia-container">
+                    <!-- Se carga dinámicamente desde modulo-asistencia.js -->
+                </div>
+            </section>
+
+            <!-- Nota Final Section -->
+            <section id="nota-final" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-calculator"></i> Cálculo de Nota Final</h2>
+                    <div class="section-actions">
+                        <button id="calculate-final" class="btn-primary">
+                            <i class="fas fa-calculator"></i> Calcular Todo
+                        </button>
+                        <button id="export-grades" class="btn-secondary">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                <div id="nota-final-container">
+                    <!-- Se carga dinámicamente desde modulo-nota-final.js -->
+                </div>
+            </section>
+
+            <!-- Comunicación Section -->
+            <section id="comunicacion" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-comments"></i> Comunicación al Hogar</h2>
+                    <button id="new-message" class="btn-primary">
+                        <i class="fas fa-envelope"></i> Nuevo Mensaje
+                    </button>
+                </div>
+                <div id="comunicacion-container">
+                    <!-- Sistema de comunicación -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal Container -->
+        <div id="modal-container"></div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Sistema FT-MEP © 2024 - Ministerio de Educación Pública de Costa Rica</p>
+            <p class="version">Versión: Sprint 2 - Evaluación Integral</p>
+        </footer>
     </div>
 
-    <!-- Contenedor Principal -->
-    <main class="container">
-        <div id="contenedorPrincipal">
-            <!-- Aquí se cargará el dashboard dinámicamente -->
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer-sistema">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h3><i class="fas fa-laptop-code"></i> FT-MEP</h3>
-                    <p>Sistema de Evaluación Integral<br>Formación Tecnológica - Sprint 2 Corregido</p>
-                </div>
-                <div class="footer-info">
-                    <p><i class="fas fa-info-circle"></i> Sistema v2.1 - REA MEP AC-CSE-259-28-2023</p>
-                    <p><i class="fas fa-calendar"></i> 2024 - Todos los derechos reservados</p>
-                </div>
-                <div class="footer-stats">
-                    <div class="stat-mini">
-                        <i class="fas fa-check-circle"></i>
-                        <span id="estadoTC">Trabajo Cotidiano: Funcional</span>
-                    </div>
-                    <div class="stat-mini">
-                        <i class="fas fa-check-circle"></i>
-                        <span id="estadoTareas">Tareas: Operativo</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts del Sistema -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Módulos funcionales -->
-    <script src="js/modulo-tareas-funcional.js"></script>
-    <script src="js/modulo-proyecto-funcional.js"></script>
-    
-    <!-- Script Principal Sprint 2 Corregido -->
-    <script src="app-sprint2-corregido.js"></script>
-    
-    <!-- Inicialización -->
-    <script>
-        // Ocultar pantalla de carga cuando todo esté listo
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                document.getElementById('progresoCarga').style.width = '100%';
-                setTimeout(() => {
-                    document.getElementById('pantallaCarga').style.display = 'none';
-                    // Inicializar sistema
-                    if (typeof inicializarSistemaSprint2 === 'function') {
-                        inicializarSistemaSprint2();
-                    }
-                }, 500);
-            }, 1000);
-        });
-        
-        // Función para abrir calculadora MEP (si existe)
-        function abrirCalculadoraMEP() {
-            if (typeof window.calculadoraMEP !== 'undefined') {
-                window.calculadoraMEP.abrir();
-            } else {
-                alert('Calculadora MEP no disponible en este momento.');
-            }
-        }
-    </script>
+    <!-- JavaScript Files -->
+    <script src="app-sprint2.js"></script>
+    <script src="js/modulo-tareas.js"></script>
+    <script src="js/modulo-proyecto.js"></script>
+    <script src="js/modulo-pruebas.js"></script>
+    <script src="js/modulo-asistencia.js"></script>
+    <script src="js/modulo-nota-final.js"></script>
+    <script src="js/modulo-comunicacion.js"></script>
 </body>
 </html>
