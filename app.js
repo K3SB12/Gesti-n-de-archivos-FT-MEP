@@ -97,8 +97,16 @@ async function cargarModuloEvaluacion(areaKey, ciclo, grado) {
     // 5. Generar y mostrar la vista de evaluación
     contenedor.innerHTML = generarHTMLVistaEvaluacion(moduloData, ciclo, grado, rdaCiclo, porcentajeTC);
     
-    // 6. Generar la tabla interactiva con los estudiantes e indicadores
-    generarTablaEvaluacion(indicadores, grado);
+    // 6. ESPERAR a que el navegador procese el HTML antes de generar la tabla
+    // Esto soluciona el error "Generando tabla de evaluación..."
+    setTimeout(() => {
+        generarTablaEvaluacion(indicadores, grado);
+        // Configurar el valor del selector de período
+        const selectPeriodo = document.getElementById('selectPeriodo');
+        if (selectPeriodo) {
+            selectPeriodo.value = sistemaFT.periodoActual;
+        }
+    }, 50);
     
     // 7. Actualizar estado del sistema
     sistemaFT.areaActual = areaKey;
@@ -498,10 +506,22 @@ function mostrarDetalleIndicador(indicadorKey) {
 
 function cambiarPeriodoEvaluacion(periodo) {
     sistemaFT.periodoActual = periodo;
+    mostrarNotificacion(`🔄 Período cambiado a: ${periodo}`, 'info');
+    
     // Recargar la vista de evaluación con los datos del nuevo período
     if (sistemaFT.areaActual && sistemaFT.nivelActual) {
         const grado = sistemaFT.estudiantes[0]?.grupo?.split('-')[0] || '4';
-        cargarModuloEvaluacion(sistemaFT.areaActual, sistemaFT.nivelActual, grado);
+        
+        // Mostrar mensaje de recarga
+        const container = document.getElementById('tablaEvaluacionContainer');
+        if (container) {
+            container.innerHTML = '<div class="cargando-tabla"><i class="fas fa-sync-alt fa-spin"></i> Cargando datos del nuevo período...</div>';
+        }
+        
+        // Recargar después de un breve delay
+        setTimeout(() => {
+            cargarModuloEvaluacion(sistemaFT.areaActual, sistemaFT.nivelActual, grado);
+        }, 300);
     }
 }
 
@@ -667,6 +687,13 @@ function mostrarDashboard() {
 
 function cargarSelectorEvaluacion(ciclo) {
     const contenedor = document.getElementById('contenedorPrincipal');
+    
+    // Determinar el grado por defecto según el ciclo (CORRECCIÓN APLICADA AQUÍ)
+    let gradoDefault = '4'; // Valor por defecto
+    if (ciclo === 'I') gradoDefault = '1';
+    if (ciclo === 'II') gradoDefault = '4';
+    if (ciclo === 'III') gradoDefault = '7';
+    
     contenedor.innerHTML = `
         <div class="selector-evaluacion">
             <div class="selector-header">
@@ -678,29 +705,33 @@ function cargarSelectorEvaluacion(ciclo) {
             </div>
             
             <div class="areas-grid">
-                <div class="area-card" onclick="cargarModuloEvaluacion('apropiacion', '${ciclo}', '${ciclo === 'I' ? '1' : cic === 'II' ? '4' : '7'}')">
+                <div class="area-card" onclick="cargarModuloEvaluacion('apropiacion', '${ciclo}', '${gradoDefault}')">
                     <div class="area-icon"><i class="fas fa-laptop"></i></div>
                     <h3>Apropiación tecnológica</h3>
                     <p>Uso efectivo y creativo de tecnologías digitales</p>
                 </div>
                 
-                <div class="area-card" onclick="cargarModuloEvaluacion('programacion', '${ciclo}', '${ciclo === 'I' ? '1' : cic === 'II' ? '4' : '7'}')">
+                <div class="area-card" onclick="cargarModuloEvaluacion('programacion', '${ciclo}', '${gradoDefault}')">
                     <div class="area-icon"><i class="fas fa-code"></i></div>
                     <h3>Programación</h3>
                     <p>Pensamiento computacional y algoritmos</p>
                 </div>
                 
-                <div class="area-card" onclick="cargarModuloEvaluacion('computacion', '${ciclo}', '${ciclo === 'I' ? '1' : cic === 'II' ? '4' : '7'}')">
+                <div class="area-card" onclick="cargarModuloEvaluacion('computacion', '${ciclo}', '${gradoDefault}')">
                     <div class="area-icon"><i class="fas fa-robot"></i></div>
                     <h3>Computación física</h3>
                     <p>Robótica y sistemas automatizados</p>
                 </div>
                 
-                <div class="area-card" onclick="cargarModuloEvaluacion('ciencia', '${ciclo}', '${ciclo === 'I' ? '1' : cic === 'II' ? '4' : '7'}')">
+                <div class="area-card" onclick="cargarModuloEvaluacion('ciencia', '${ciclo}', '${gradoDefault}')">
                     <div class="area-icon"><i class="fas fa-brain"></i></div>
                     <h3>Ciencia de datos</h3>
                     <p>Análisis de datos e inteligencia artificial</p>
                 </div>
+            </div>
+            
+            <div class="selector-nota">
+                <p><i class="fas fa-info-circle"></i> <strong>Nota:</strong> Actualmente se muestran indicadores para <strong>${gradoDefault}° grado</strong> como ejemplo. En el Sprint 2 se agregará un selector para elegir cualquier grado.</p>
             </div>
         </div>
     `;
@@ -747,3 +778,4 @@ if (document.readyState === 'loading') {
 }
 
 console.log('✅ Sistema FT-MEP - Sprint 1 cargado');
+
