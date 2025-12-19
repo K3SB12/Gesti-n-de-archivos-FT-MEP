@@ -1,1835 +1,1010 @@
-// ============================================
-// SISTEMA FT-MEP - SPRINT 2: EVALUACIÓN COMPLETA
-// ============================================
+// ==============================================
+// SISTEMA FT-MEP - SPRINT 2
+// Núcleo principal de la aplicación
+// ==============================================
 
-// Variables globales extendidas para Sprint 2
-let sistemaFT = {
-    estudiantes: [],
-    nivelActual: null,
-    moduloActual: null,
-    areaActual: null,
-    periodoActual: 'semana-1',
-    
-    // Almacenamiento Sprint 1
-    calificacionesTC: JSON.parse(localStorage.getItem('ft_calificaciones_tc')) || {},
-    
-    // Nuevos componentes Sprint 2
-    tareas: JSON.parse(localStorage.getItem('ft_tareas')) || {},
-    asistencias: JSON.parse(localStorage.getItem('ft_asistencias')) || {},
-    pruebasEjecucion: JSON.parse(localStorage.getItem('ft_pruebas_ejecucion')) || {},
-    proyectos: JSON.parse(localStorage.getItem('ft_proyectos')) || {},
-    comunicaciones: JSON.parse(localStorage.getItem('ft_comunicaciones')) || {},
-    
-    // Configuración de períodos
-    periodos: [
-        { id: 'semana-1', nombre: 'Semana 1' },
-        { id: 'semana-2', nombre: 'Semana 2' },
-        { id: 'semana-3', nombre: 'Semana 3' },
-        { id: 'semana-4', nombre: 'Semana 4' },
-        { id: 'mes-1', nombre: 'Mes 1' },
-        { id: 'mes-2', nombre: 'Mes 2' },
-        { id: 'mes-3', nombre: 'Mes 3' },
-        { id: 'trimestre-1', nombre: 'I Trimestre' },
-        { id: 'trimestre-2', nombre: 'II Trimestre' },
-        { id: 'trimestre-3', nombre: 'III Trimestre' }
-    ]
-};
-
-// ============================================
-// 1. INICIALIZACIÓN MEJORADA
-// ============================================
-
-async function inicializarSistemaSprint2() {
-    console.log('🚀 Sistema FT-MEP Sprint 2 inicializando...');
-    await cargarDatosIniciales();
-    mostrarDashboardCompleto();
-    console.log('✅ Sistema Sprint 2 listo');
-}
-
-async function cargarDatosIniciales() {
-    try {
-        const response = await fetch('data/estudiantes.json');
-        const data = await response.json();
+class SistemaFTMEP {
+    constructor() {
+        this.currentCycle = 'III';
+        this.currentArea = null;
+        this.currentPeriod = 'semana1';
+        this.estudiantes = [];
+        this.moduloData = null;
+        this.evaluaciones = {
+            trabajoCotidiano: {},
+            tareas: [],
+            proyecto: {},
+            pruebas: {},
+            asistencia: {}
+        };
         
-        sistemaFT.estudiantes = data.map(est => ({
-            id: est.id || est.codigo || est.cedula || `est-${Date.now()}`,
-            nombre: est.nombre || 'Estudiante sin nombre',
-            cedula: est.cedula || est.codigo || est.id || 'N/A',
-            grupo: est.grupo || "4-A",
-            ciclo: determinarCiclo(est.grupo || "4-A"),
-            necesidades: est.necesidades || [],
-            asistenciaTotal: est.asistencia || 0,
-            notaPeriodoAnterior: est.notaPeriodoAnterior || 0,
-            email: est.email || '',
-            telefono: est.telefono || '',
-            responsable: est.responsable || ''
-        }));
+        this.init();
+    }
+    
+    // ===== INICIALIZACIÓN =====
+    async init() {
+        console.log('🚀 Iniciando Sistema FT-MEP Sprint 2');
         
-        console.log(`✅ ${sistemaFT.estudiantes.length} estudiantes cargados`);
+        // Cargar datos iniciales
+        await this.cargarDatos();
         
-    } catch (error) {
-        console.error('Error cargando estudiantes:', error);
-        // DATOS DE EMERGENCIA MEJORADOS - CON ESTUDIANTES PARA LOS 3 CICLOS
-        sistemaFT.estudiantes = [
-            // I CICLO (1°-3°)
-            {id: "est-101", nombre: "Sofía Rojas Alfaro", cedula: "701230456", grupo: "1-A", ciclo: "I", email: "sofia@ejemplo.edu.cr"},
-            {id: "est-102", nombre: "Diego Vargas Mora", cedula: "702340567", grupo: "2-B", ciclo: "I", email: "diego@ejemplo.edu.cr"},
-            {id: "est-103", nombre: "Valeria Castro Solís", cedula: "703450678", grupo: "3-A", ciclo: "I", email: "valeria@ejemplo.edu.cr"},
+        // Configurar event listeners
+        this.configurarEventos();
+        
+        // Cargar evaluaciones guardadas
+        this.cargarEvaluacionesGuardadas();
+        
+        // Actualizar dashboard
+        this.actualizarDashboard();
+        
+        console.log('✅ Sistema inicializado correctamente');
+    }
+    
+    async cargarDatos() {
+        try {
+            // Cargar estudiantes
+            const response = await fetch('data/estudiantes.json');
+            this.estudiantes = await response.json();
+            console.log(`✅ Cargados ${this.estudiantes.length} estudiantes`);
             
-            // II CICLO (4°-6°) - TU GRUPO PRINCIPAL
-            {id: "1", nombre: "Aaron Gonzales Mera", cedula: "3068800365", grupo: "4-A", ciclo: "II", email: "aaron@ejemplo.edu.cr"},
-            {id: "2", nombre: "María Rodríguez Pérez", cedula: "2087601234", grupo: "4-A", ciclo: "II", email: "maria@ejemplo.edu.cr"},
-            {id: "est-201", nombre: "Carlos López García", cedula: "3094506789", grupo: "5-B", ciclo: "II", email: "carlos@ejemplo.edu.cr"},
-            {id: "est-202", nombre: "Ana Fernández Jiménez", cedula: "4105607890", grupo: "6-C", ciclo: "II", email: "ana@ejemplo.edu.cr"},
+            // Inicializar módulos
+            await this.inicializarModulos();
             
-            // III CICLO (7°-9°)
-            {id: "est-301", nombre: "Pedro Solís Vargas", cedula: "5116708901", grupo: "7-A", ciclo: "III", email: "pedro@ejemplo.edu.cr"},
-            {id: "est-302", nombre: "Camila Navarro Ríos", cedula: "6127809012", grupo: "8-B", ciclo: "III", email: "camila@ejemplo.edu.cr"},
-            {id: "est-303", nombre: "Javier Méndez Castro", cedula: "7138900123", grupo: "9-C", ciclo: "III", email: "javier@ejemplo.edu.cr"},
-            {id: "est-304", nombre: "Gabriela Soto Chaves", cedula: "8149001234", grupo: "7-B", ciclo: "III", email: "gabriela@ejemplo.edu.cr"}
+        } catch (error) {
+            console.error('❌ Error cargando datos:', error);
+            this.mostrarError('Error al cargar los datos. Verifica la conexión.');
+        }
+    }
+    
+    async inicializarModulos() {
+        // Inicializar módulos de evaluación
+        if (typeof ModuloTareas !== 'undefined') {
+            this.moduloTareas = new ModuloTareas(this.estudiantes, this);
+        }
+        
+        if (typeof ModuloProyecto !== 'undefined') {
+            this.moduloProyecto = new ModuloProyecto(this.estudiantes, this);
+        }
+        
+        if (typeof ModuloAsistencia !== 'undefined') {
+            this.moduloAsistencia = new ModuloAsistencia(this.estudiantes, this);
+        }
+    }
+    
+    // ===== CONFIGURACIÓN DE EVENTOS =====
+    configurarEventos() {
+        // Navegación
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.cambiarSeccion(e.target.dataset.section));
+        });
+        
+        // Selector de ciclo
+        document.querySelectorAll('.cycle-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.cambiarCiclo(e.target.dataset.cycle));
+        });
+        
+        // Selector de área
+        const areaSelect = document.getElementById('area-select');
+        if (areaSelect) {
+            areaSelect.addEventListener('change', (e) => this.cargarAreaEvaluacion(e.target.value));
+        }
+        
+        // Guardar trabajo cotidiano
+        const saveBtn = document.getElementById('save-tc');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.guardarTrabajoCotidiano());
+        }
+        
+        // Cambiar período
+        const periodBtn = document.getElementById('change-period');
+        if (periodBtn) {
+            periodBtn.addEventListener('click', () => this.cambiarPeriodo());
+        }
+        
+        // Botones de acciones rápidas
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.ejecutarAccionRapida(e.target.dataset.action));
+        });
+    }
+    
+    // ===== GESTIÓN DE CICLOS =====
+    cambiarCiclo(ciclo) {
+        if (this.currentCycle === ciclo) return;
+        
+        // Actualizar botones activos
+        document.querySelectorAll('.cycle-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.cycle === ciclo);
+        });
+        
+        this.currentCycle = ciclo;
+        console.log(`🔄 Cambiando a ${ciclo} Ciclo`);
+        
+        // Actualizar componentes según ciclo
+        this.actualizarComponentesCiclo();
+        
+        // Actualizar dashboard
+        this.actualizarDashboard();
+        
+        this.mostrarNotificacion(`Cambiado a ${ciclo} Ciclo`, 'success');
+    }
+    
+    actualizarComponentesCiclo() {
+        const componentsList = document.getElementById('components-list');
+        if (!componentsList) return;
+        
+        const componentes = this.obtenerComponentesCiclo();
+        componentsList.innerHTML = '';
+        
+        componentes.forEach(componente => {
+            const div = document.createElement('div');
+            div.className = 'component-item';
+            div.innerHTML = `
+                <div class="component-info">
+                    <h4>${componente.nombre}</h4>
+                    <p>${componente.descripcion}</p>
+                </div>
+                <div class="component-value ${componente.estado}">
+                    ${componente.valor}
+                </div>
+            `;
+            componentsList.appendChild(div);
+        });
+    }
+    
+    obtenerComponentesCiclo() {
+        const baseComponents = [
+            {
+                nombre: 'Trabajo Cotidiano',
+                descripcion: 'Evaluación formativa diaria',
+                valor: this.getPorcentajeTC() + '%',
+                estado: 'excellent'
+            },
+            {
+                nombre: 'Tareas',
+                descripcion: 'Actividades asignadas',
+                valor: '10%',
+                estado: 'good'
+            },
+            {
+                nombre: 'Asistencia',
+                descripcion: 'Registro de presencia',
+                valor: '10%',
+                estado: 'good'
+            }
         ];
-        console.log('Usando datos de emergencia mejorados:', sistemaFT.estudiantes);
-    }
-}
-
-function determinarCiclo(grupo) {
-    const grado = parseInt(grupo.split('-')[0]);
-    if (grado >= 1 && grado <= 3) return "I";
-    if (grado >= 4 && grado <= 6) return "II";
-    if (grado >= 7 && grado <= 9) return "III";
-    return "II";
-}
-
-// ============================================
-// 2. DASHBOARD COMPLETO SPRINT 2
-// ============================================
-
-function mostrarDashboardCompleto() {
-    const contenedor = document.getElementById('contenedorPrincipal');
-    if (!contenedor) return;
-    
-    contenedor.innerHTML = `
-        <div class="dashboard-completo">
-            <!-- Header del Dashboard -->
-            <div class="dashboard-header">
-                <div>
-                    <h2><i class="fas fa-tachometer-alt"></i> Panel de Control FT-MEP</h2>
-                    <p>Sistema Integral de Evaluación - MEP Costa Rica</p>
-                </div>
-                <div class="dashboard-actions">
-                    <button class="btn btn-primary" onclick="cargarEvaluacionCompleta()">
-                        <i class="fas fa-clipboard-check"></i> Evaluación Completa
-                    </button>
-                    <button class="btn btn-outline" onclick="cargarReportes()">
-                        <i class="fas fa-chart-bar"></i> Reportes
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Estadísticas Principales -->
-            <div class="stats-grid">
-                <div class="stat-card main-stat">
-                    <div class="stat-icon"><i class="fas fa-users"></i></div>
-                    <div class="stat-content">
-                        <h3>${sistemaFT.estudiantes.length}</h3>
-                        <p>Estudiantes Activos</p>
-                        <small>${sistemaFT.periodoActual}</small>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-percentage"></i></div>
-                    <div class="stat-content">
-                        <h3 id="estadisticaAsistencia">0%</h3>
-                        <p>Asistencia Promedio</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-content">
-                        <h3 id="estadisticaTareas">0</h3>
-                        <p>Tareas Entregadas</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-project-diagram"></i></div>
-                    <div class="stat-content">
-                        <h3 id="estadisticaProyectos">0</h3>
-                        <p>Proyectos Activos</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Módulos de Evaluación -->
-            <div class="modulos-evaluacion">
-                <h3><i class="fas fa-cogs"></i> Módulos de Evaluación</h3>
-                <p class="subtitulo">Componentes reglamentarios según REA MEP</p>
-                
-                <div class="modulos-grid">
-                    <!-- Módulo 1: Trabajo Cotidiano -->
-                    <div class="modulo-card" onclick="cargarModuloEvaluacion('tc')">
-                        <div class="modulo-icon ${sistemaFT.nivelActual === 'III' ? 'ciclo-iii' : 'ciclo-ii'}">
-                            <i class="fas fa-clipboard-list"></i>
-                        </div>
-                        <div class="modulo-content">
-                            <h4>Trabajo Cotidiano</h4>
-                            <p class="modulo-porcentaje">
-                                ${sistemaFT.nivelActual === 'I' ? '65%' : sistemaFT.nivelActual === 'II' ? '60%' : '50%'}
-                                <span class="badge-ciclo">${sistemaFT.nivelActual || 'II'} Ciclo</span>
-                            </p>
-                            <p class="modulo-desc">Evaluación formativa por indicadores</p>
-                            <div class="modulo-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${calcularProgresoModulo('tc')}%"></div>
-                                </div>
-                                <span>${calcularProgresoModulo('tc')}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Módulo 2: Tareas -->
-                    <div class="modulo-card" onclick="cargarModuloEvaluacion('tareas')">
-                        <div class="modulo-icon">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="modulo-content">
-                            <h4>Tareas</h4>
-                            <p class="modulo-porcentaje">10% <span class="badge-ciclo">Todos</span></p>
-                            <p class="modulo-desc">Actividades fuera del aula</p>
-                            <div class="modulo-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${calcularProgresoModulo('tareas')}%"></div>
-                                </div>
-                                <span>${calcularProgresoModulo('tareas')}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Módulo 3: Asistencia -->
-                    <div class="modulo-card" onclick="cargarModuloEvaluacion('asistencia')">
-                        <div class="modulo-icon">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <div class="modulo-content">
-                            <h4>Asistencia</h4>
-                            <p class="modulo-porcentaje">10% <span class="badge-ciclo">Todos</span></p>
-                            <p class="modulo-desc">Registro de participación</p>
-                            <div class="modulo-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${calcularProgresoModulo('asistencia')}%"></div>
-                                </div>
-                                <span>${calcularProgresoModulo('asistencia')}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Módulo 4: Prueba/Proyecto -->
-                    <div class="modulo-card" onclick="cargarModuloEvaluacion('prueba-proyecto')">
-                        <div class="modulo-icon ${sistemaFT.nivelActual === 'III' ? 'proyecto' : 'prueba'}">
-                            <i class="${sistemaFT.nivelActual === 'III' ? 'fas fa-project-diagram' : 'fas fa-file-signature'}"></i>
-                        </div>
-                        <div class="modulo-content">
-                            <h4>${sistemaFT.nivelActual === 'III' ? 'Proyecto' : 'Prueba Ejecución'}</h4>
-                            <p class="modulo-porcentaje">
-                                ${sistemaFT.nivelActual === 'III' ? '30%' : sistemaFT.nivelActual === 'II' ? '20%' : '15%'}
-                                <span class="badge-ciclo">${sistemaFT.nivelActual || 'II'} Ciclo</span>
-                            </p>
-                            <p class="modulo-desc">${sistemaFT.nivelActual === 'III' ? 'Design Thinking' : 'Evaluación práctica'}</p>
-                            <div class="modulo-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${calcularProgresoModulo('prueba-proyecto')}%"></div>
-                                </div>
-                                <span>${calcularProgresoModulo('prueba-proyecto')}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Módulo 5: Comunicaciones -->
-                    <div class="modulo-card" onclick="cargarModuloEvaluacion('comunicaciones')">
-                        <div class="modulo-icon">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                        <div class="modulo-content">
-                            <h4>Comunicaciones</h4>
-                            <p class="modulo-porcentaje">Registro</p>
-                            <p class="modulo-desc">Bitácora docente y contacto</p>
-                            <div class="modulo-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${calcularProgresoModulo('comunicaciones')}%"></div>
-                                </div>
-                                <span>${calcularProgresoModulo('comunicaciones')}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Módulo 6: Nota Final -->
-                    <div class="modulo-card final" onclick="calcularNotaFinal()">
-                        <div class="modulo-icon">
-                            <i class="fas fa-calculator"></i>
-                        </div>
-                        <div class="modulo-content">
-                            <h4>Nota Final</h4>
-                            <p class="modulo-porcentaje">Cálculo</p>
-                            <p class="modulo-desc">Integración de componentes</p>
-                            <button class="btn btn-primary btn-sm">
-                                <i class="fas fa-calculator"></i> Calcular
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Ciclos Educativos -->
-            <div class="seccion-ciclos">
-                <h3><i class="fas fa-graduation-cap"></i> Seleccionar Ciclo</h3>
-                <div class="ciclos-grid">
-                    <div class="ciclo-card" onclick="seleccionarCiclo('I')">
-                        <div class="ciclo-header ciclo-i">
-                            <i class="fas fa-child"></i>
-                            <h4>I Ciclo</h4>
-                        </div>
-                        <div class="ciclo-body">
-                            <p>1°-3° Primaria</p>
-                            <ul class="ciclo-componentes">
-                                <li><strong>65%</strong> Trabajo Cotidiano</li>
-                                <li><strong>10%</strong> Tareas</li>
-                                <li><strong>15%</strong> Prueba Ejecución</li>
-                                <li><strong>10%</strong> Asistencia</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="ciclo-card active" onclick="seleccionarCiclo('II')">
-                        <div class="ciclo-header ciclo-ii">
-                            <i class="fas fa-user-graduate"></i>
-                            <h4>II Ciclo</h4>
-                        </div>
-                        <div class="ciclo-body">
-                            <p>4°-6° Primaria</p>
-                            <ul class="ciclo-componentes">
-                                <li><strong>60%</strong> Trabajo Cotidiano</li>
-                                <li><strong>10%</strong> Tareas</li>
-                                <li><strong>20%</strong> Prueba Ejecución</li>
-                                <li><strong>10%</strong> Asistencia</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="ciclo-card" onclick="seleccionarCiclo('III')">
-                        <div class="ciclo-header ciclo-iii">
-                            <i class="fas fa-graduation-cap"></i>
-                            <h4>III Ciclo</h4>
-                        </div>
-                        <div class="ciclo-body">
-                            <p>7°-9° Secundaria</p>
-                            <ul class="ciclo-componentes">
-                                <li><strong>50%</strong> Trabajo Cotidiano</li>
-                                <li><strong>10%</strong> Tareas</li>
-                                <li><strong>30%</strong> Proyecto</li>
-                                <li><strong>10%</strong> Asistencia</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Período Actual -->
-            <div class="periodo-actual">
-                <div class="periodo-header">
-                    <h4><i class="fas fa-calendar-alt"></i> Período de Evaluación</h4>
-                    <select id="selectPeriodoGlobal" onchange="cambiarPeriodoGlobal(this.value)">
-                        ${sistemaFT.periodos.map(p => 
-                            `<option value="${p.id}" ${p.id === sistemaFT.periodoActual ? 'selected' : ''}>${p.nombre}</option>`
-                        ).join('')}
-                    </select>
-                </div>
-                <div class="periodo-info">
-                    <p><i class="fas fa-info-circle"></i> Todos los módulos usarán este período para evaluar</p>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    actualizarEstadisticasDashboard();
-}
-
-function calcularProgresoModulo(modulo) {
-    // Calcular porcentaje de completitud para cada módulo
-    const totalEstudiantes = sistemaFT.estudiantes.length;
-    if (totalEstudiantes === 0) return 0;
-    
-    let calificados = 0;
-    
-    switch(modulo) {
-        case 'tc':
-            if (sistemaFT.calificacionesTC[sistemaFT.periodoActual]) {
-                Object.values(sistemaFT.calificacionesTC[sistemaFT.periodoActual]).forEach(est => {
-                    if (Object.keys(est).length > 0) calificados++;
-                });
-            }
-            break;
-            
-        case 'tareas':
-            if (sistemaFT.tareas[sistemaFT.periodoActual]) {
-                Object.values(sistemaFT.tareas[sistemaFT.periodoActual]).forEach(tarea => {
-                    if (tarea.entregada) calificados++;
-                });
-            }
-            break;
-            
-        case 'asistencia':
-            if (sistemaFT.asistencias[sistemaFT.periodoActual]) {
-                calificados = Object.keys(sistemaFT.asistencias[sistemaFT.periodoActual]).length;
-            }
-            break;
-            
-        case 'prueba-proyecto':
-            if (sistemaFT.nivelActual === 'III') {
-                if (sistemaFT.proyectos[sistemaFT.periodoActual]) {
-                    calificados = Object.keys(sistemaFT.proyectos[sistemaFT.periodoActual]).length;
-                }
-            } else {
-                if (sistemaFT.pruebasEjecucion[sistemaFT.periodoActual]) {
-                    calificados = Object.keys(sistemaFT.pruebasEjecucion[sistemaFT.periodoActual]).length;
-                }
-            }
-            break;
-            
-        case 'comunicaciones':
-            if (sistemaFT.comunicaciones[sistemaFT.periodoActual]) {
-                calificados = Object.keys(sistemaFT.comunicaciones[sistemaFT.periodoActual]).length;
-            }
-            break;
-    }
-    
-    return Math.round((calificados / totalEstudiantes) * 100);
-}
-
-function actualizarEstadisticasDashboard() {
-    // Actualizar estadísticas dinámicas
-    const asistenciaPromedio = calcularAsistenciaPromedio();
-    document.getElementById('estadisticaAsistencia').textContent = `${asistenciaPromedio}%`;
-    
-    const tareasEntregadas = contarTareasEntregadas();
-    document.getElementById('estadisticaTareas').textContent = tareasEntregadas;
-    
-    const proyectosActivos = contarProyectosActivos();
-    document.getElementById('estadisticaProyectos').textContent = proyectosActivos;
-}
-
-// ============================================
-// 3. SISTEMA DE CARGAR MÓDULOS
-// ============================================
-
-function cargarModuloEvaluacion(modulo) {
-    const contenedor = document.getElementById('contenedorPrincipal');
-    if (!contenedor) return;
-    
-    switch(modulo) {
-        case 'tc':
-            cargarSelectorAreaTrabajoCotidiano();
-            break;
-        case 'tareas':
-            cargarModuloTareas();
-            break;
-        case 'asistencia':
-            cargarModuloAsistencia();
-            break;
-        case 'prueba-proyecto':
-            if (sistemaFT.nivelActual === 'III') {
-                cargarModuloProyecto();
-            } else {
-                cargarModuloPruebaEjecucion();
-            }
-            break;
-        case 'comunicaciones':
-            cargarModuloComunicaciones();
-            break;
-        default:
-            contenedor.innerHTML = '<div class="error">Módulo no disponible</div>';
-    }
-}
-
-function cargarSelectorAreaTrabajoCotidiano() {
-    const contenedor = document.getElementById('contenedorPrincipal');
-    const gradoDefault = sistemaFT.nivelActual === 'I' ? '1' : sistemaFT.nivelActual === 'II' ? '4' : '7';
-    
-    contenedor.innerHTML = `
-        <div class="selector-modulo">
-            <div class="selector-header">
-                <button class="btn-volver" onclick="mostrarDashboardCompleto()">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <h2><i class="fas fa-clipboard-list"></i> Trabajo Cotidiano</h2>
-                <p>${calcularPorcentajeComponente('tc')}% - Evaluación formativa por indicadores</p>
-            </div>
-            
-            <div class="selector-instructions">
-                <div class="instruction-card">
-                    <i class="fas fa-info-circle"></i>
-                    <p><strong>Evaluación por criterios:</strong> Alto(3) - Medio(2) - Bajo(1)</p>
-                </div>
-            </div>
-            
-            <div class="areas-grid">
-                <div class="area-card" onclick="cargarAreaEvaluacion('apropiacion')">
-                    <div class="area-icon"><i class="fas fa-laptop"></i></div>
-                    <h3>Apropiación tecnológica</h3>
-                    <p>Evaluar indicadores de uso y creatividad digital</p>
-                    <div class="area-progress">
-                        <span>${calcularProgresoArea('apropiacion')}% evaluado</span>
-                    </div>
-                </div>
-                
-                <div class="area-card" onclick="cargarAreaEvaluacion('programacion')">
-                    <div class="area-icon"><i class="fas fa-code"></i></div>
-                    <h3>Programación</h3>
-                    <p>Evaluar pensamiento computacional</p>
-                    <div class="area-progress">
-                        <span>${calcularProgresoArea('programacion')}% evaluado</span>
-                    </div>
-                </div>
-                
-                <div class="area-card" onclick="cargarAreaEvaluacion('computacion')">
-                    <div class="area-icon"><i class="fas fa-robot"></i></div>
-                    <h3>Computación física</h3>
-                    <p>Evaluar robótica y automatización</p>
-                    <div class="area-progress">
-                        <span>${calcularProgresoArea('computacion')}% evaluado</span>
-                    </div>
-                </div>
-                
-                <div class="area-card" onclick="cargarAreaEvaluacion('ciencia')">
-                    <div class="area-icon"><i class="fas fa-brain"></i></div>
-                    <h3>Ciencia de datos</h3>
-                    <p>Evaluar análisis e IA</p>
-                    <div class="area-progress">
-                        <span>${calcularProgresoArea('ciencia')}% evaluado</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="selector-footer">
-                <button class="btn btn-primary" onclick="calcularPromedioTrabajoCotidiano()">
-                    <i class="fas fa-calculator"></i> Calcular Promedio TC
-                </button>
-                <button class="btn btn-outline" onclick="exportarCalificacionesTC()">
-                    <i class="fas fa-file-export"></i> Exportar TC
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-function calcularProgresoArea(area) {
-    // Implementar cálculo real basado en datos
-    return Math.floor(Math.random() * 100); // Temporal
-}
-
-// ============================================
-// 4. MÓDULO DE TAREAS (10%)
-// ============================================
-
-function cargarModuloTareas() {
-    const contenedor = document.getElementById('contenedorPrincipal');
-    const periodo = sistemaFT.periodoActual;
-    
-    contenedor.innerHTML = `
-        <div class="modulo-tareas">
-            <div class="modulo-header">
-                <button class="btn-volver" onclick="mostrarDashboardCompleto()">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <div>
-                    <h2><i class="fas fa-tasks"></i> Tareas</h2>
-                    <p class="modulo-subtitulo">10% de la nota final - Período: ${periodo}</p>
-                </div>
-                <div class="modulo-actions">
-                    <button class="btn btn-primary" onclick="crearNuevaTarea()">
-                        <i class="fas fa-plus"></i> Nueva Tarea
-                    </button>
-                </div>
-            </div>
-            
-            <div class="tareas-container">
-                <div class="tareas-sidebar">
-                    <h3><i class="fas fa-list"></i> Lista de Tareas</h3>
-                    <div class="tareas-lista" id="listaTareas">
-                        <!-- Tareas se cargarán aquí -->
-                    </div>
-                    <button class="btn btn-outline btn-block" onclick="crearNuevaTarea()">
-                        <i class="fas fa-plus"></i> Agregar Tarea
-                    </button>
-                </div>
-                
-                <div class="tareas-main">
-                    <div class="tareas-controls">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="buscarEstudianteTareas" placeholder="Buscar estudiante..." onkeyup="filtrarEstudiantesTareas()">
-                        </div>
-                        <div class="tareas-stats">
-                            <span><i class="fas fa-check-circle"></i> <span id="contadorEntregadas">0</span> entregadas</span>
-                            <span><i class="fas fa-clock"></i> <span id="contadorPendientes">0</span> pendientes</span>
-                        </div>
-                    </div>
-                    
-                    <div class="tareas-table-container">
-                        <table class="tareas-table" id="tablaTareas">
-                            <thead>
-                                <tr>
-                                    <th class="col-estudiante">Estudiante</th>
-                                    <th class="col-grupo">Grupo</th>
-                                    <th class="col-estado">Estado</th>
-                                    <th class="col-calificacion">Calificación</th>
-                                    <th class="col-porcentaje">10%</th>
-                                    <th class="col-acciones">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpoTablaTareas">
-                                <!-- Filas se generarán dinámicamente -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="tareas-summary">
-                        <h4><i class="fas fa-chart-pie"></i> Resumen de Tareas</h4>
-                        <div class="summary-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Promedio Grupo:</span>
-                                <span class="stat-value" id="promedioTareasGrupo">0.0</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Aporte Nota:</span>
-                                <span class="stat-value" id="aporteTareasGrupo">0.0</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Entregas a Tiempo:</span>
-                                <span class="stat-value" id="entregasTiempo">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    cargarListaTareas();
-    generarTablaTareas();
-}
-
-function cargarListaTareas() {
-    const container = document.getElementById('listaTareas');
-    if (!container) return;
-    
-    // Tareas de ejemplo
-    const tareasEjemplo = [
-        { id: 'tarea-1', nombre: 'Investigación sobre IA', fecha: '2024-03-15', tipo: 'Investigación' },
-        { id: 'tarea-2', nombre: 'Programa en Scratch', fecha: '2024-03-20', tipo: 'Práctica' },
-        { id: 'tarea-3', nombre: 'Presentación digital', fecha: '2024-03-25', tipo: 'Proyecto' },
-        { id: 'tarea-4', nombre: 'Análisis de datos', fecha: '2024-03-30', tipo: 'Análisis' }
-    ];
-    
-    container.innerHTML = tareasEjemplo.map(tarea => `
-        <div class="tarea-item ${tarea.id === 'tarea-1' ? 'active' : ''}" onclick="seleccionarTarea('${tarea.id}')">
-            <div class="tarea-icon">
-                <i class="fas fa-${tarea.tipo === 'Investigación' ? 'search' : tarea.tipo === 'Práctica' ? 'code' : 'file-alt'}"></i>
-            </div>
-            <div class="tarea-info">
-                <h4>${tarea.nombre}</h4>
-                <small>${tarea.fecha} • ${tarea.tipo}</small>
-            </div>
-            <div class="tarea-badge">78%</div>
-        </div>
-    `).join('');
-}
-
-function generarTablaTareas() {
-    const tbody = document.getElementById('cuerpoTablaTareas');
-    if (!tbody) return;
-    
-    const tareaId = 'tarea-1'; // Tarea seleccionada por defecto
-    const periodo = sistemaFT.periodoActual;
-    
-    let html = '';
-    let totalCalificacion = 0;
-    let totalEntregadas = 0;
-    let totalEstudiantes = 0;
-    
-    sistemaFT.estudiantes.forEach(estudiante => {
-        // Obtener calificación existente o generar una aleatoria para demo
-        let calificacion = 0;
-        let entregada = false;
-        let estado = 'Pendiente';
-        let estadoClass = 'pendiente';
         
-        if (sistemaFT.tareas[periodo] && sistemaFT.tareas[periodo][estudiante.id]) {
-            const tareaEst = sistemaFT.tareas[periodo][estudiante.id][tareaId];
-            if (tareaEst) {
-                calificacion = tareaEst.calificacion || 0;
-                entregada = tareaEst.entregada || false;
-                estado = entregada ? 'Entregada' : 'Pendiente';
-                estadoClass = entregada ? 'entregada' : 'pendiente';
-            }
+        if (this.currentCycle === 'III') {
+            baseComponents.push({
+                nombre: 'Proyecto',
+                descripcion: 'Design Thinking - III Ciclo',
+                valor: '30%',
+                estado: 'info'
+            });
         } else {
-            // Datos de demostración
-            const rand = Math.random();
-            entregada = rand > 0.3;
-            calificacion = entregada ? Math.floor(rand * 100) : 0;
-            estado = entregada ? 'Entregada' : 'Pendiente';
-            estadoClass = entregada ? 'entregada' : 'pendiente';
+            baseComponents.push({
+                nombre: 'Prueba de Ejecución',
+                descripcion: this.currentCycle === 'I' ? '15% - I Ciclo' : '20% - II Ciclo',
+                valor: this.currentCycle === 'I' ? '15%' : '20%',
+                estado: 'warning'
+            });
         }
         
-        if (entregada) {
-            totalCalificacion += calificacion;
-            totalEntregadas++;
+        return baseComponents;
+    }
+    
+    getPorcentajeTC() {
+        switch(this.currentCycle) {
+            case 'I': return 65;
+            case 'II': return 60;
+            case 'III': return 50;
+            default: return 0;
         }
-        totalEstudiantes++;
+    }
+    
+    // ===== GESTIÓN DE SECCIONES =====
+    cambiarSeccion(seccionId) {
+        // Actualizar navegación
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.section === seccionId);
+        });
         
-        const aporte = (calificacion * 10 / 100).toFixed(1);
+        // Ocultar todas las secciones
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
         
-        html += `
-            <tr data-estudiante="${estudiante.id}" data-tarea="${tareaId}">
-                <td class="col-estudiante">
-                    <div class="estudiante-info">
-                        <strong>${estudiante.nombre}</strong>
-                        <small>${estudiante.cedula}</small>
-                    </div>
-                </td>
-                <td class="col-grupo">${estudiante.grupo}</td>
-                <td class="col-estado">
-                    <span class="badge-estado ${estadoClass}">${estado}</span>
-                </td>
-                <td class="col-calificacion">
-                    <input type="number" 
-                           min="0" 
-                           max="100" 
-                           value="${calificacion}"
-                           onchange="actualizarCalificacionTarea('${estudiante.id}', '${tareaId}', this.value)"
-                           ${!entregada ? 'disabled' : ''}>
-                    <small>/100</small>
-                </td>
-                <td class="col-porcentaje">${aporte}</td>
-                <td class="col-acciones">
-                    <button class="btn-icon ${entregada ? 'btn-success' : 'btn-outline'}" 
-                            onclick="cambiarEstadoTarea('${estudiante.id}', '${tareaId}', ${!entregada})">
-                        <i class="fas fa-${entregada ? 'check' : 'times'}"></i>
-                    </button>
-                    <button class="btn-icon" onclick="verDetalleTarea('${estudiante.id}', '${tareaId}')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </td>
-            </tr>
+        // Mostrar sección seleccionada
+        const seccion = document.getElementById(seccionId);
+        if (seccion) {
+            seccion.classList.add('active');
+            
+            // Cargar contenido específico de la sección
+            this.cargarContenidoSeccion(seccionId);
+        }
+        
+        console.log(`📁 Cambiando a sección: ${seccionId}`);
+    }
+    
+    cargarContenidoSeccion(seccionId) {
+        switch(seccionId) {
+            case 'trabajo-cotidiano':
+                this.inicializarTrabajoCotidiano();
+                break;
+                
+            case 'tareas':
+                if (this.moduloTareas) {
+                    this.moduloTareas.cargarInterfaz();
+                }
+                break;
+                
+            case 'proyecto-prueba':
+                this.cargarProyectoPrueba();
+                break;
+                
+            case 'asistencia':
+                if (this.moduloAsistencia) {
+                    this.moduloAsistencia.cargarInterfaz();
+                }
+                break;
+                
+            case 'nota-final':
+                this.cargarNotaFinal();
+                break;
+                
+            case 'comunicacion':
+                this.cargarComunicacion();
+                break;
+        }
+    }
+    
+    // ===== TRABAJO COTIDIANO =====
+    async inicializarTrabajoCotidiano() {
+        const container = document.getElementById('tc-container');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-clipboard-check"></i>
+                <p>Seleccione un área del PNFT para evaluar</p>
+                <small class="text-muted">Áreas: Apropiación tecnológica, Programación, Computación física, Ciencia de datos</small>
+            </div>
         `;
-    });
+        
+        // Configurar selector de área
+        this.configurarSelectorArea();
+    }
     
-    tbody.innerHTML = html;
+    configurarSelectorArea() {
+        const areaSelect = document.getElementById('area-select');
+        if (!areaSelect) return;
+        
+        // Limpiar opciones existentes
+        areaSelect.innerHTML = `
+            <option value="">Seleccionar área...</option>
+            <option value="apropiacion">Apropiación tecnológica y digital</option>
+            <option value="programacion">Programación y Algoritmos</option>
+            <option value="computacion">Computación física y Robótica</option>
+            <option value="ciencia">Ciencia de datos e Inteligencia artificial</option>
+        `;
+        
+        // Restaurar selección anterior si existe
+        if (this.currentArea) {
+            areaSelect.value = this.currentArea;
+            this.cargarAreaEvaluacion(this.currentArea);
+        }
+    }
     
-    // Actualizar estadísticas
-    const promedio = totalEntregadas > 0 ? (totalCalificacion / totalEntregadas).toFixed(1) : 0;
-    const aporteGrupo = (promedio * 10 / 100).toFixed(1);
-    const entregasTiempo = totalEstudiantes > 0 ? Math.round((totalEntregadas / totalEstudiantes) * 100) : 0;
-    
-    document.getElementById('contadorEntregadas').textContent = totalEntregadas;
-    document.getElementById('contadorPendientes').textContent = totalEstudiantes - totalEntregadas;
-    document.getElementById('promedioTareasGrupo').textContent = promedio;
-    document.getElementById('aporteTareasGrupo').textContent = aporteGrupo;
-    document.getElementById('entregasTiempo').textContent = `${entregasTiempo}%`;
-}
-
-function actualizarCalificacionTarea(estudianteId, tareaId, calificacion) {
-    const periodo = sistemaFT.periodoActual;
-    const valor = parseInt(calificacion) || 0;
-    
-    if (!sistemaFT.tareas[periodo]) sistemaFT.tareas[periodo] = {};
-    if (!sistemaFT.tareas[periodo][estudianteId]) sistemaFT.tareas[periodo][estudianteId] = {};
-    
-    sistemaFT.tareas[periodo][estudianteId][tareaId] = {
-        ...sistemaFT.tareas[periodo][estudianteId][tareaId],
-        calificacion: valor,
-        entregada: true,
-        fechaCalificacion: new Date().toISOString()
-    };
-    
-    localStorage.setItem('ft_tareas', JSON.stringify(sistemaFT.tareas));
-    mostrarNotificacion('✅ Calificación de tarea actualizada', 'success');
-    recalcularEstadisticasTareas();
-}
-
-function cambiarEstadoTarea(estudianteId, tareaId, entregada) {
-    const periodo = sistemaFT.periodoActual;
-    
-    if (!sistemaFT.tareas[periodo]) sistemaFT.tareas[periodo] = {};
-    if (!sistemaFT.tareas[periodo][estudianteId]) sistemaFT.tareas[periodo][estudianteId] = {};
-    
-    sistemaFT.tareas[periodo][estudianteId][tareaId] = {
-        ...sistemaFT.tareas[periodo][estudianteId][tareaId],
-        entregada: entregada,
-        fechaEntrega: entregada ? new Date().toISOString() : null,
-        calificacion: entregada ? (sistemaFT.tareas[periodo][estudianteId][tareaId]?.calificacion || 0) : 0
-    };
-    
-    localStorage.setItem('ft_tareas', JSON.stringify(sistemaFT.tareas));
-    
-    const estado = entregada ? 'entregada' : 'pendiente';
-    mostrarNotificacion(`✅ Tarea marcada como ${estado}`, 'success');
-    
-    // Regenerar la tabla
-    setTimeout(() => generarTablaTareas(), 100);
-}
-
-function recalcularEstadisticasTareas() {
-    // Implementar recálculo
-    console.log('Recalculando estadísticas de tareas...');
-}
-
-// ============================================
-// 5. MÓDULO DE ASISTENCIA (10%)
-// ============================================
-
-function cargarModuloAsistencia() {
-    const contenedor = document.getElementById('contenedorPrincipal');
-    const periodo = sistemaFT.periodoActual;
-    
-    contenedor.innerHTML = `
-        <div class="modulo-asistencia">
-            <div class="modulo-header">
-                <button class="btn-volver" onclick="mostrarDashboardCompleto()">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <div>
-                    <h2><i class="fas fa-calendar-check"></i> Asistencia</h2>
-                    <p class="modulo-subtitulo">10% de la nota final - Período: ${periodo}</p>
-                </div>
-                <div class="modulo-actions">
-                    <button class="btn btn-primary" onclick="tomarAsistenciaRapida()">
-                        <i class="fas fa-user-check"></i> Tomar Asistencia
-                    </button>
-                    <button class="btn btn-outline" onclick="generarReporteAsistencia()">
-                        <i class="fas fa-file-pdf"></i> Reporte
+    async cargarAreaEvaluacion(area) {
+        if (!area) return;
+        
+        this.currentArea = area;
+        const container = document.getElementById('tc-container');
+        
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Cargando indicadores del área...</p>
+            </div>
+        `;
+        
+        try {
+            // Cargar módulo correspondiente
+            const moduleFile = this.getModuleFile(area);
+            const response = await fetch(`modulos-ft/${moduleFile}`);
+            this.moduloData = await response.json();
+            
+            // Generar tabla de evaluación
+            this.generarTablaEvaluacion();
+            
+            console.log(`✅ Módulo ${area} cargado correctamente`);
+            
+        } catch (error) {
+            console.error('❌ Error cargando módulo:', error);
+            container.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error al cargar los indicadores del área. Verifica que el archivo exista.</p>
+                    <button class="btn-secondary mt-3" onclick="sistema.cargarAreaEvaluacion('${area}')">
+                        Reintentar
                     </button>
                 </div>
+            `;
+        }
+    }
+    
+    getModuleFile(area) {
+        const files = {
+            'apropiacion': 'apropiacion-tecnologica.json',
+            'programacion': 'programacion-algoritmos.json',
+            'computacion': 'computacion-fisica.json',
+            'ciencia': 'ciencia-datos.json'
+        };
+        return files[area] || 'apropiacion-tecnologica.json';
+    }
+    
+    generarTablaEvaluacion() {
+        const container = document.getElementById('tc-container');
+        if (!this.moduloData || !this.estudiantes.length) return;
+        
+        // Obtener indicadores para el ciclo actual
+        const cicloData = this.moduloData[this.currentCycle];
+        if (!cicloData) {
+            container.innerHTML = `<div class="warning-message">No hay datos para ${this.currentCycle} Ciclo</div>`;
+            return;
+        }
+        
+        // Generar tabla
+        let html = `
+            <div class="table-info mb-4">
+                <h4><i class="fas fa-info-circle"></i> ${cicloData.nombre}</h4>
+                <p>${cicloData.descripcion}</p>
+                <div class="badge badge-primary">${this.getPorcentajeTC()}% de la nota final</div>
             </div>
             
-            <div class="asistencia-controls">
-                <div class="control-group">
-                    <label for="fechaAsistencia"><i class="fas fa-calendar-day"></i> Fecha:</label>
-                    <input type="date" id="fechaAsistencia" value="${new Date().toISOString().split('T')[0]}">
-                </div>
-                <div class="control-group">
-                    <label for="tipoClase"><i class="fas fa-chalkboard-teacher"></i> Tipo:</label>
-                    <select id="tipoClase">
-                        <option value="presencial">Presencial</option>
-                        <option value="virtual">Virtual</option>
-                        <option value="hibrida">Híbrida</option>
-                    </select>
-                </div>
-                <button class="btn btn-success" onclick="guardarAsistencia()">
-                    <i class="fas fa-save"></i> Guardar
-                </button>
-            </div>
-            
-            <div class="asistencia-table-container">
-                <table class="asistencia-table">
+            <div class="tc-table-container">
+                <table class="table">
                     <thead>
                         <tr>
-                            <th class="col-estudiante">Estudiante</th>
-                            <th class="col-grupo">Grupo</th>
-                            <th class="col-asistencia">Asistencia</th>
-                            <th class="col-justificacion">Justificación</th>
-                            <th class="col-porcentaje">% Asistencia</th>
-                            <th class="col-aporte">10% Aporte</th>
+                            <th>Estudiante</th>
+        `;
+        
+        // Columnas de indicadores
+        if (cicloData.indicadores && cicloData.indicadores.length > 0) {
+            cicloData.indicadores.forEach(ind => {
+                html += `<th title="${ind.descripcion}">${ind.codigo}</th>`;
+            });
+        }
+        
+        html += `
+                            <th>Promedio TC</th>
+                            <th>% TC (${this.getPorcentajeTC()}%)</th>
+                            <th>Nivel</th>
                         </tr>
                     </thead>
-                    <tbody id="cuerpoAsistencia">
-                        <!-- Filas generadas dinámicamente -->
+                    <tbody>
+        `;
+        
+        // Filas de estudiantes
+        this.estudiantes.forEach(estudiante => {
+            const estudianteId = estudiante.id || estudiante.nombre.toLowerCase().replace(/\s+/g, '-');
+            html += `<tr data-estudiante="${estudianteId}">`;
+            html += `<td><strong>${estudiante.nombre}</strong><br><small>${estudiante.grado}</small></td>`;
+            
+            // Celdas de indicadores
+            if (cicloData.indicadores) {
+                cicloData.indicadores.forEach(ind => {
+                    const calificacion = this.obtenerCalificacionTC(estudianteId, ind.id);
+                    html += this.generarCeldaCalificacion(estudianteId, ind.id, calificacion);
+                });
+            }
+            
+            // Promedio
+            const promedio = this.calcularPromedioTC(estudianteId);
+            html += `
+                <td class="text-center"><strong>${promedio.toFixed(2)}</strong></td>
+                <td class="text-center">${(promedio * this.getPorcentajeTC() / 3).toFixed(2)}%</td>
+                <td class="text-center">${this.obtenerNivel(promedio)}</td>
+            `;
+            
+            html += `</tr>`;
+        });
+        
+        html += `
                     </tbody>
                 </table>
             </div>
             
-            <div class="asistencia-summary">
-                <div class="summary-card">
-                    <h4><i class="fas fa-chart-line"></i> Estadísticas</h4>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <span class="summary-label">Asistencia Total:</span>
-                            <span class="summary-value" id="asistenciaTotal">0%</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Ausencias:</span>
-                            <span class="summary-value" id="totalAusencias">0</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Justificadas:</span>
-                            <span class="summary-value" id="totalJustificadas">0</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Aporte Nota:</span>
-                            <span class="summary-value" id="aporteAsistencia">0.0</span>
-                        </div>
-                    </div>
+            <div class="mt-4">
+                <h5><i class="fas fa-info-circle"></i> Instrucciones:</h5>
+                <p>Haz clic en cualquier celda para calificar: <span class="badge grade-3">Alto (3)</span> 
+                <span class="badge grade-2">Medio (2)</span> <span class="badge grade-1">Bajo (1)</span></p>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        // Configurar eventos de las celdas
+        this.configurarEventosCalificacion();
+    }
+    
+    generarCeldaCalificacion(estudianteId, indicadorId, calificacion) {
+        let clase = 'indicator-cell';
+        let texto = '';
+        
+        if (calificacion === 3) {
+            clase += ' grade-3';
+            texto = 'Alto';
+        } else if (calificacion === 2) {
+            clase += ' grade-2';
+            texto = 'Medio';
+        } else if (calificacion === 1) {
+            clase += ' grade-1';
+            texto = 'Bajo';
+        }
+        
+        return `
+            <td class="${clase}" 
+                data-estudiante="${estudianteId}"
+                data-indicador="${indicadorId}"
+                onclick="sistema.mostrarSelectorCalificacion(this)">
+                ${texto || '—'}
+            </td>
+        `;
+    }
+    
+    configurarEventosCalificacion() {
+        // Los eventos se configuran mediante onclick en las celdas
+    }
+    
+    mostrarSelectorCalificacion(celda) {
+        const estudianteId = celda.dataset.estudiante;
+        const indicadorId = celda.dataset.indicador;
+        
+        // Crear modal de calificación
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-edit"></i> Calificar Indicador</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                 </div>
-                
-                <div class="summary-card">
-                    <h4><i class="fas fa-user-friends"></i> Por Grupo</h4>
-                    <div class="grupo-stats" id="estadisticasGrupo">
-                        <!-- Estadísticas por grupo -->
+                <div class="modal-body">
+                    <p>Estudiante: <strong>${this.obtenerNombreEstudiante(estudianteId)}</strong></p>
+                    <p>Indicador: <strong>${this.obtenerNombreIndicador(indicadorId)}</strong></p>
+                    
+                    <div class="grade-options mt-4">
+                        <button class="grade-option grade-3" onclick="sistema.asignarCalificacion('${estudianteId}', '${indicadorId}', 3)">
+                            <strong>Alto (3)</strong><br>
+                            <small>Realiza la tarea de forma autónoma y precisa</small>
+                        </button>
+                        <button class="grade-option grade-2" onclick="sistema.asignarCalificacion('${estudianteId}', '${indicadorId}', 2)">
+                            <strong>Medio (2)</strong><br>
+                            <small>Realiza la tarea con algo de ayuda</small>
+                        </button>
+                        <button class="grade-option grade-1" onclick="sistema.asignarCalificacion('${estudianteId}', '${indicadorId}', 1)">
+                            <strong>Bajo (1)</strong><br>
+                            <small>Requiere ayuda constante</small>
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
-    
-    generarTablaAsistencia();
-}
-
-function generarTablaAsistencia() {
-    const tbody = document.getElementById('cuerpoAsistencia');
-    if (!tbody) return;
-    
-    const fecha = document.getElementById('fechaAsistencia')?.value || new Date().toISOString().split('T')[0];
-    const periodo = sistemaFT.periodoActual;
-    
-    let html = '';
-    let totalAsistencias = 0;
-    let totalEstudiantes = 0;
-    let totalAusencias = 0;
-    let totalJustificadas = 0;
-    
-    // Agrupar estudiantes por grupo
-    const estudiantesPorGrupo = {};
-    sistemaFT.estudiantes.forEach(est => {
-        if (!estudiantesPorGrupo[est.grupo]) {
-            estudiantesPorGrupo[est.grupo] = [];
-        }
-        estudiantesPorGrupo[est.grupo].push(est);
-    });
-    
-    // Generar filas por grupo
-    Object.keys(estudiantesPorGrupo).forEach(grupo => {
-        // Header del grupo
-        html += `
-            <tr class="grupo-header">
-                <td colspan="6">
-                    <strong><i class="fas fa-users"></i> Grupo ${grupo}</strong>
-                    <span class="grupo-count">${estudiantesPorGrupo[grupo].length} estudiantes</span>
-                </td>
-            </tr>
         `;
         
-        // Estudiantes del grupo
-        estudiantesPorGrupo[grupo].forEach(estudiante => {
-            totalEstudiantes++;
+        document.getElementById('modal-container').appendChild(modal);
+    }
+    
+    asignarCalificacion(estudianteId, indicadorId, calificacion) {
+        // Guardar en memoria
+        if (!this.evaluaciones.trabajoCotidiano[this.currentPeriod]) {
+            this.evaluaciones.trabajoCotidiano[this.currentPeriod] = {};
+        }
+        
+        if (!this.evaluaciones.trabajoCotidiano[this.currentPeriod][estudianteId]) {
+            this.evaluaciones.trabajoCotidiano[this.currentPeriod][estudianteId] = {};
+        }
+        
+        this.evaluaciones.trabajoCotidiano[this.currentPeriod][estudianteId][indicadorId] = calificacion;
+        
+        // Actualizar celda
+        const celda = document.querySelector(`[data-estudiante="${estudianteId}"][data-indicador="${indicadorId}"]`);
+        if (celda) {
+            celda.className = `indicator-cell grade-${calificacion}`;
+            celda.innerHTML = calificacion === 3 ? 'Alto' : calificacion === 2 ? 'Medio' : 'Bajo';
+        }
+        
+        // Actualizar promedios
+        this.actualizarPromediosEstudiante(estudianteId);
+        
+        // Cerrar modal
+        document.querySelector('.modal')?.remove();
+        
+        this.mostrarNotificacion('Calificación guardada', 'success');
+    }
+    
+    actualizarPromediosEstudiante(estudianteId) {
+        const fila = document.querySelector(`[data-estudiante="${estudianteId}"]`);
+        if (!fila) return;
+        
+        const promedio = this.calcularPromedioTC(estudianteId);
+        const celdas = fila.querySelectorAll('td');
+        
+        // Actualizar promedio
+        if (celdas[celdas.length - 3]) {
+            celdas[celdas.length - 3].innerHTML = `<strong>${promedio.toFixed(2)}</strong>`;
+        }
+        
+        // Actualizar porcentaje
+        if (celdas[celdas.length - 2]) {
+            celdas[celdas.length - 2].innerHTML = `${(promedio * this.getPorcentajeTC() / 3).toFixed(2)}%`;
+        }
+        
+        // Actualizar nivel
+        if (celdas[celdas.length - 1]) {
+            celdas[celdas.length - 1].innerHTML = this.obtenerNivel(promedio);
+        }
+    }
+    
+    calcularPromedioTC(estudianteId) {
+        const periodoData = this.evaluaciones.trabajoCotidiano[this.currentPeriod];
+        if (!periodoData || !periodoData[estudianteId]) return 0;
+        
+        const calificaciones = Object.values(periodoData[estudianteId]);
+        if (calificaciones.length === 0) return 0;
+        
+        const suma = calificaciones.reduce((a, b) => a + b, 0);
+        return suma / calificaciones.length;
+    }
+    
+    obtenerCalificacionTC(estudianteId, indicadorId) {
+        const periodoData = this.evaluaciones.trabajoCotidiano[this.currentPeriod];
+        if (!periodoData || !periodoData[estudianteId]) return 0;
+        
+        return periodoData[estudianteId][indicadorId] || 0;
+    }
+    
+    obtenerNombreEstudiante(estudianteId) {
+        const estudiante = this.estudiantes.find(e => 
+            (e.id || e.nombre.toLowerCase().replace(/\s+/g, '-')) === estudianteId
+        );
+        return estudiante ? estudiante.nombre : estudianteId;
+    }
+    
+    obtenerNombreIndicador(indicadorId) {
+        if (!this.moduloData || !this.moduloData[this.currentCycle]) return indicadorId;
+        
+        const indicador = this.moduloData[this.currentCycle].indicadores?.find(i => i.id === indicadorId);
+        return indicador ? `${indicador.codigo}: ${indicador.nombre}` : indicadorId;
+    }
+    
+    obtenerNivel(promedio) {
+        if (promedio >= 2.5) return '<span class="badge badge-success">Excelente</span>';
+        if (promedio >= 2.0) return '<span class="badge badge-info">Bueno</span>';
+        if (promedio >= 1.5) return '<span class="badge badge-warning">Aceptable</span>';
+        return '<span class="badge badge-danger">Bajo</span>';
+    }
+    
+    // ===== GESTIÓN DE PROYECTO/PRUEBA =====
+    cargarProyectoPrueba() {
+        const container = document.getElementById('proyecto-container');
+        const title = document.getElementById('proyecto-title');
+        const actions = document.getElementById('proyecto-actions');
+        
+        if (this.currentCycle === 'III') {
+            title.innerHTML = '<i class="fas fa-project-diagram"></i> Proyecto III Ciclo (30%)';
             
-            // Obtener asistencia existente para esta fecha específica
-            let asistio = true;
-            let justificacion = '';
-            
-            if (sistemaFT.asistencias[periodo] && 
-                sistemaFT.asistencias[periodo][estudiante.id] &&
-                sistemaFT.asistencias[periodo][estudiante.id][fecha]) {
-                
-                const asistenciaDia = sistemaFT.asistencias[periodo][estudiante.id][fecha];
-                asistio = asistenciaDia.asistio !== false;
-                justificacion = asistenciaDia.justificacion || '';
-                
-                if (!asistio) {
-                    totalAusencias++;
-                    if (justificacion) totalJustificadas++;
-                } else {
-                    totalAsistencias++;
-                }
+            if (this.moduloProyecto) {
+                this.moduloProyecto.cargarInterfaz();
             } else {
-                // Si no hay registro, considerar presente por defecto
-                totalAsistencias++;
+                container.innerHTML = `
+                    <div class="warning-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Módulo de proyecto no cargado. Recarga la página.</p>
+                    </div>
+                `;
             }
+        } else {
+            const porcentaje = this.currentCycle === 'I' ? '15%' : '20%';
+            title.innerHTML = `<i class="fas fa-clipboard-list"></i> Prueba de Ejecución ${this.currentCycle} Ciclo (${porcentaje})`;
             
-            // Calcular porcentaje de asistencia histórico
-            let porcentajeAsistencia = calcularPorcentajeAsistenciaHistorico(estudiante.id);
-            let aporteAsistencia = (porcentajeAsistencia * 10 / 100).toFixed(1);
+            container.innerHTML = `
+                <div class="card">
+                    <h4>Prueba de Ejecución - ${this.currentCycle} Ciclo</h4>
+                    <p>Este módulo evalúa la aplicación práctica de los conocimientos.</p>
+                    
+                    <div class="mt-4">
+                        <button class="btn-primary" onclick="sistema.crearNuevaPrueba()">
+                            <i class="fas fa-plus"></i> Crear Nueva Prueba
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    crearNuevaPrueba() {
+        alert('Funcionalidad de Pruebas en desarrollo');
+    }
+    
+    // ===== NOTA FINAL =====
+    cargarNotaFinal() {
+        const container = document.getElementById('nota-final-container');
+        
+        container.innerHTML = `
+            <div class="card">
+                <h4><i class="fas fa-calculator"></i> Cálculo de Nota Final</h4>
+                <p>Integración de todos los componentes según el REA AC-CSE-259-28-2023</p>
+                
+                <div class="form-group mt-4">
+                    <button class="btn-primary" onclick="sistema.calcularNotaFinal()">
+                        <i class="fas fa-calculator"></i> Calcular Nota Final para Todos
+                    </button>
+                    <button class="btn-secondary" onclick="sistema.generarReporte()">
+                        <i class="fas fa-file-export"></i> Generar Reporte
+                    </button>
+                </div>
+                
+                <div id="resultados-nota-final" class="mt-4"></div>
+            </div>
+        `;
+    }
+    
+    calcularNotaFinal() {
+        const resultadosDiv = document.getElementById('resultados-nota-final');
+        
+        // Calcular para cada estudiante
+        const resultados = this.estudiantes.map(estudiante => {
+            const estudianteId = estudiante.id || estudiante.nombre.toLowerCase().replace(/\s+/g, '-');
+            const notaFinal = this.calcularNotaEstudiante(estudianteId);
             
+            return {
+                estudiante: estudiante.nombre,
+                nota: notaFinal.toFixed(2),
+                estado: notaFinal >= 70 ? 'Aprobado' : 'Reprobado'
+            };
+        });
+        
+        // Mostrar resultados
+        let html = `
+            <h5>Resultados del Cálculo</h5>
+            <div class="table-container mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Nota Final</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        resultados.forEach(resultado => {
             html += `
-                <tr data-estudiante="${estudiante.id}" data-grupo="${grupo}" data-fecha="${fecha}">
-                    <td class="col-estudiante">
-                        <div class="estudiante-info">
-                            <strong>${estudiante.nombre}</strong>
-                            <small>${estudiante.cedula}</small>
-                        </div>
+                <tr>
+                    <td>${resultado.estudiante}</td>
+                    <td><strong>${resultado.nota}</strong></td>
+                    <td>
+                        ${resultado.estado === 'Aprobado' 
+                            ? '<span class="badge badge-success">Aprobado</span>' 
+                            : '<span class="badge badge-danger">Reprobado</span>'}
                     </td>
-                    <td class="col-grupo">${grupo}</td>
-                    <td class="col-asistencia">
-                        <div class="asistencia-toggle">
-                            <button class="btn-toggle ${asistio ? 'active' : ''}" 
-                                    onclick="cambiarAsistencia('${estudiante.id}', '${fecha}', ${!asistio})">
-                                <i class="fas fa-${asistio ? 'check' : 'times'}"></i>
-                                ${asistio ? 'Presente' : 'Ausente'}
-                            </button>
-                        </div>
-                    </td>
-                    <td class="col-justificacion">
-                        <div class="justificacion-container">
-                            <input type="text" 
-                                   class="justificacion-input"
-                                   value="${justificacion}"
-                                   placeholder="${asistio ? 'No aplica' : 'Motivo ausencia...'}"
-                                   onchange="actualizarJustificacion('${estudiante.id}', '${fecha}', this.value)"
-                                   ${asistio ? 'disabled' : ''}>
-                            <button class="btn-justificacion" onclick="mostrarOpcionesJustificacion('${estudiante.id}', '${fecha}')" ${asistio ? 'disabled' : ''}>
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                        </div>
-                    </td>
-                    <td class="col-porcentaje">
-                        <span class="porcentaje-badge ${porcentajeAsistencia >= 90 ? 'alto' : porcentajeAsistencia >= 70 ? 'medio' : 'bajo'}" 
-                              title="Asistencia histórica en el período">
-                            ${porcentajeAsistencia}%
-                        </span>
-                    </td>
-                    <td class="col-aporte">${aporteAsistencia}</td>
                 </tr>
             `;
         });
-    });
-    
-    tbody.innerHTML = html;
-    
-    // Calcular estadísticas
-    const porcentajeAsistenciaTotal = totalEstudiantes > 0 ? Math.round((totalAsistencias / totalEstudiantes) * 100) : 0;
-    const aportePromedio = (porcentajeAsistenciaTotal * 10 / 100).toFixed(1);
-    
-    document.getElementById('asistenciaTotal').textContent = `${porcentajeAsistenciaTotal}%`;
-    document.getElementById('totalAusencias').textContent = totalAusencias;
-    document.getElementById('totalJustificadas').textContent = totalJustificadas;
-    document.getElementById('aporteAsistencia').textContent = aportePromedio;
-    
-    // Generar estadísticas por grupo
-    const grupoStats = document.getElementById('estadisticasGrupo');
-    if (grupoStats) {
-        let gruposHTML = '';
-        Object.keys(estudiantesPorGrupo).forEach(grupo => {
-            const estudiantesGrupo = estudiantesPorGrupo[grupo];
-            const asistenciasGrupo = estudiantesGrupo.filter(est => {
-                if (sistemaFT.asistencias[periodo] && 
-                    sistemaFT.asistencias[periodo][est.id] &&
-                    sistemaFT.asistencias[periodo][est.id][fecha]) {
-                    return sistemaFT.asistencias[periodo][est.id][fecha].asistio !== false;
-                }
-                return true; // Por defecto presente
-            }).length;
-            
-            const porcentajeGrupo = estudiantesGrupo.length > 0 ? 
-                Math.round((asistenciasGrupo / estudiantesGrupo.length) * 100) : 0;
-            
-            gruposHTML += `
-                <div class="grupo-stat-item">
-                    <span class="grupo-name">${grupo}</span>
-                    <div class="grupo-details">
-                        <span class="grupo-asistencia">${asistenciasGrupo}/${estudiantesGrupo.length}</span>
-                        <span class="grupo-porcentaje ${porcentajeGrupo >= 90 ? 'alto' : porcentajeGrupo >= 70 ? 'medio' : 'bajo'}">
-                            ${porcentajeGrupo}%
-                        </span>
-                    </div>
-                </div>
-            `;
-        });
-        grupoStats.innerHTML = gruposHTML;
-    }
-    
-    // Actualizar fecha en el título
-    const fechaObj = new Date(fecha);
-    const fechaFormateada = fechaObj.toLocaleDateString('es-CR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    
-    document.querySelector('.modulo-subtitulo').innerHTML = 
-        `10% de la nota final - <strong>${fechaFormateada}</strong>`;
-}
-
-// Nueva función para calcular porcentaje histórico
-function calcularPorcentajeAsistenciaHistorico(estudianteId) {
-    const periodo = sistemaFT.periodoActual;
-    if (!sistemaFT.asistencias[periodo] || !sistemaFT.asistencias[periodo][estudianteId]) {
-        return 100; // Si no hay registros, 100% por defecto
-    }
-    
-    const registros = sistemaFT.asistencias[periodo][estudianteId];
-    const dias = Object.keys(registros);
-    
-    if (dias.length === 0) return 100;
-    
-    const presentes = dias.filter(dia => registros[dia].asistio !== false).length;
-    return Math.round((presentes / dias.length) * 100);
-}
-
-// Función mejorada para cambiar asistencia
-function cambiarAsistencia(estudianteId, fecha, asistio) {
-    const periodo = sistemaFT.periodoActual;
-    
-    if (!sistemaFT.asistencias[periodo]) sistemaFT.asistencias[periodo] = {};
-    if (!sistemaFT.asistencias[periodo][estudianteId]) sistemaFT.asistencias[periodo][estudianteId] = {};
-    
-    sistemaFT.asistencias[periodo][estudianteId][fecha] = {
-        asistio: asistio,
-        fecha: fecha,
-        horaRegistro: new Date().toLocaleTimeString('es-CR'),
-        justificacion: asistio ? '' : (sistemaFT.asistencias[periodo][estudianteId][fecha]?.justificacion || '')
-    };
-    
-    localStorage.setItem('ft_asistencias', JSON.stringify(sistemaFT.asistencias));
-    
-    mostrarNotificacion(
-        `✅ ${asistio ? 'Asistencia registrada' : 'Ausencia registrada'} para ${obtenerNombreEstudiante(estudianteId)}`,
-        asistio ? 'success' : 'warning'
-    );
-    
-    // Regenerar tabla
-    setTimeout(() => generarTablaAsistencia(), 100);
-}
-
-// Función para actualizar justificación
-function actualizarJustificacion(estudianteId, fecha, justificacion) {
-    const periodo = sistemaFT.periodoActual;
-    
-    if (sistemaFT.asistencias[periodo] && 
-        sistemaFT.asistencias[periodo][estudianteId] &&
-        sistemaFT.asistencias[periodo][estudianteId][fecha]) {
-        
-        sistemaFT.asistencias[periodo][estudianteId][fecha].justificacion = justificacion;
-        localStorage.setItem('ft_asistencias', JSON.stringify(sistemaFT.asistencias));
-        
-        if (justificacion.trim()) {
-            mostrarNotificacion('✅ Justificación guardada', 'success');
-        }
-    }
-}
-
-// Función para mostrar opciones de justificación común
-function mostrarOpcionesJustificacion(estudianteId, fecha) {
-    const opciones = [
-        'Enfermedad',
-        'Cita médica',
-        'Problemas familiares',
-        'Transporte',
-        'Otras actividades escolares',
-        'Permiso especial'
-    ];
-    
-    const selector = document.createElement('div');
-    selector.className = 'selector-justificacion';
-    selector.innerHTML = `
-        <div class="selector-header">
-            <span>Seleccionar justificación común</span>
-            <button class="btn-cerrar" onclick="this.parentElement.parentElement.remove()">&times;</button>
-        </div>
-        <div class="opciones-justificacion">
-            ${opciones.map(op => `
-                <button class="opcion" onclick="seleccionarJustificacion('${estudianteId}', '${fecha}', '${op}')">
-                    ${op}
-                </button>
-            `).join('')}
-        </div>
-    `;
-    
-    // Posicionar cerca del campo de justificación
-    const input = document.querySelector(`[data-estudiante="${estudianteId}"][data-fecha="${fecha}"] .justificacion-input`);
-    if (input) {
-        const rect = input.getBoundingClientRect();
-        selector.style.position = 'fixed';
-        selector.style.top = `${rect.bottom + 5}px`;
-        selector.style.left = `${rect.left}px`;
-        selector.style.zIndex = '1000';
-    }
-    
-    document.body.appendChild(selector);
-}
-
-function seleccionarJustificacion(estudianteId, fecha, justificacion) {
-    const input = document.querySelector(`[data-estudiante="${estudianteId}"][data-fecha="${fecha}"] .justificacion-input`);
-    if (input) {
-        input.value = justificacion;
-        input.dispatchEvent(new Event('change'));
-    }
-    
-    const selector = document.querySelector('.selector-justificacion');
-    if (selector) selector.remove();
-}
-
-// Función auxiliar para obtener nombre
-function obtenerNombreEstudiante(estudianteId) {
-    const estudiante = sistemaFT.estudiantes.find(e => e.id === estudianteId);
-    return estudiante ? estudiante.nombre : 'Estudiante';
-}
-
-// ============================================
-// 6. MÓDULO DE PRUEBA DE EJECUCIÓN (15-20%)
-// ============================================
-
-function cargarModuloPruebaEjecucion() {
-    const contenedor = document.getElementById('contenedorPrincipal');
-    const porcentaje = sistemaFT.nivelActual === 'I' ? 15 : 20;
-    
-    contenedor.innerHTML = `
-        <div class="modulo-prueba">
-            <div class="modulo-header">
-                <button class="btn-volver" onclick="mostrarDashboardCompleto()">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <div>
-                    <h2><i class="fas fa-file-signature"></i> Prueba de Ejecución</h2>
-                    <p class="modulo-subtitulo">${porcentaje}% de la nota final - Evaluación práctica</p>
-                </div>
-                <div class="modulo-actions">
-                    <button class="btn btn-primary" onclick="crearNuevaPrueba()">
-                        <i class="fas fa-plus"></i> Nueva Prueba
-                    </button>
-                </div>
-            </div>
-            
-            <div class="prueba-container">
-                <div class="prueba-config">
-                    <h3><i class="fas fa-cog"></i> Configurar Prueba</h3>
-                    <div class="config-grid">
-                        <div class="config-item">
-                            <label for="nombrePrueba">Nombre de la prueba:</label>
-                            <input type="text" id="nombrePrueba" placeholder="Ej: Evaluación Scratch 4°" value="Evaluación de Programación">
-                        </div>
-                        <div class="config-item">
-                            <label for="fechaPrueba">Fecha:</label>
-                            <input type="date" id="fechaPrueba" value="${new Date().toISOString().split('T')[0]}">
-                        </div>
-                        <div class="config-item">
-                            <label for="tipoPrueba">Tipo:</label>
-                            <select id="tipoPrueba">
-                                <option value="practica">Práctica</option>
-                                <option value="proyecto">Proyecto</option>
-                                <option value="ejecucion">Ejecución</option>
-                                <option value="oral">Oral</option>
-                            </select>
-                        </div>
-                        <div class="config-item">
-                            <label for="puntajeMaximo">Puntaje máximo:</label>
-                            <input type="number" id="puntajeMaximo" value="100" min="1" max="1000">
-                        </div>
-                    </div>
-                    
-                    <div class="criterios-prueba">
-                        <h4><i class="fas fa-list-check"></i> Criterios de Evaluación</h4>
-                        <div id="listaCriterios">
-                            <div class="criterio-item">
-                                <input type="text" placeholder="Criterio (ej: Funcionalidad)" value="Funcionalidad">
-                                <input type="number" placeholder="Puntos" value="40" min="0" max="100">
-                                <button class="btn-icon btn-danger" onclick="eliminarCriterio(this)"><i class="fas fa-trash"></i></button>
-                            </div>
-                            <div class="criterio-item">
-                                <input type="text" placeholder="Criterio (ej: Creatividad)" value="Creatividad">
-                                <input type="number" placeholder="Puntos" value="30" min="0" max="100">
-                                <button class="btn-icon btn-danger" onclick="eliminarCriterio(this)"><i class="fas fa-trash"></i></button>
-                            </div>
-                            <div class="criterio-item">
-                                <input type="text" placeholder="Criterio (ej: Presentación)" value="Presentación">
-                                <input type="number" placeholder="Puntos" value="30" min="0" max="100">
-                                <button class="btn-icon btn-danger" onclick="eliminarCriterio(this)"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </div>
-                        <button class="btn btn-outline btn-sm" onclick="agregarCriterio()">
-                            <i class="fas fa-plus"></i> Agregar Criterio
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="prueba-evaluacion">
-                    <h3><i class="fas fa-clipboard-check"></i> Evaluar Estudiantes</h3>
-                    <div class="prueba-table-container">
-                        <table class="prueba-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-estudiante">Estudiante</th>
-                                    <th class="col-grupo">Grupo</th>
-                                    <th class="col-funcionalidad">Funcionalidad (40)</th>
-                                    <th class="col-creatividad">Creatividad (30)</th>
-                                    <th class="col-presentacion">Presentación (30)</th>
-                                    <th class="col-total">Total /100</th>
-                                    <th class="col-porcentaje">${porcentaje}%</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpoPrueba">
-                                <!-- Filas generadas dinámicamente -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="prueba-summary">
-                        <div class="summary-card">
-                            <h4><i class="fas fa-chart-bar"></i> Estadísticas</h4>
-                            <div class="summary-grid">
-                                <div class="summary-item">
-                                    <span class="summary-label">Promedio Grupo:</span>
-                                    <span class="summary-value" id="promedioPrueba">0.0</span>
-                                </div>
-                                <div class="summary-item">
-                                    <span class="summary-label">Más Alto:</span>
-                                    <span class="summary-value" id="maximoPrueba">0.0</span>
-                                </div>
-                                <div class="summary-item">
-                                    <span class="summary-label">Más Bajo:</span>
-                                    <span class="summary-value" id="minimoPrueba">0.0</span>
-                                </div>
-                                <div class="summary-item">
-                                    <span class="summary-label">Aporte Nota:</span>
-                                    <span class="summary-value" id="aportePrueba">0.0</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="prueba-actions">
-                            <button class="btn btn-primary" onclick="guardarPruebaEjecucion()">
-                                <i class="fas fa-save"></i> Guardar Evaluación
-                            </button>
-                            <button class="btn btn-outline" onclick="exportarPrueba()">
-                                <i class="fas fa-file-export"></i> Exportar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    generarTablaPruebaEjecucion();
-}
-
-function generarTablaPruebaEjecucion() {
-    const tbody = document.getElementById('cuerpoPrueba');
-    if (!tbody) return;
-    
-    const porcentaje = sistemaFT.nivelActual === 'I' ? 15 : 20;
-    const periodo = sistemaFT.periodoActual;
-    
-    let html = '';
-    let totalPuntajes = [];
-    
-    sistemaFT.estudiantes.forEach(estudiante => {
-        // Obtener calificación existente o generar aleatoria para demo
-        let funcionalidad = 0;
-        let creatividad = 0;
-        let presentacion = 0;
-        let total = 0;
-        
-        if (sistemaFT.pruebasEjecucion[periodo] && sistemaFT.pruebasEjecucion[periodo][estudiante.id]) {
-            const prueba = sistemaFT.pruebasEjecucion[periodo][estudiante.id];
-            funcionalidad = prueba.funcionalidad || 0;
-            creatividad = prueba.creatividad || 0;
-            presentacion = prueba.presentacion || 0;
-            total = prueba.total || 0;
-        } else {
-            // Datos de demostración
-            funcionalidad = Math.floor(Math.random() * 41); // 0-40
-            creatividad = Math.floor(Math.random() * 31); // 0-30
-            presentacion = Math.floor(Math.random() * 31); // 0-30
-            total = funcionalidad + creatividad + presentacion;
-        }
-        
-        totalPuntajes.push(total);
-        const aporte = (total * porcentaje / 100).toFixed(1);
         
         html += `
-            <tr data-estudiante="${estudiante.id}">
-                <td class="col-estudiante">
-                    <div class="estudiante-info">
-                        <strong>${estudiante.nombre}</strong>
-                        <small>${estudiante.cedula}</small>
-                    </div>
-                </td>
-                <td class="col-grupo">${estudiante.grupo}</td>
-                <td class="col-funcionalidad">
-                    <input type="number" 
-                           min="0" 
-                           max="40" 
-                           value="${funcionalidad}"
-                           onchange="actualizarCriterioPrueba('${estudiante.id}', 'funcionalidad', this.value)">
-                </td>
-                <td class="col-creatividad">
-                    <input type="number" 
-                           min="0" 
-                           max="30" 
-                           value="${creatividad}"
-                           onchange="actualizarCriterioPrueba('${estudiante.id}', 'creatividad', this.value)">
-                </td>
-                <td class="col-presentacion">
-                    <input type="number" 
-                           min="0" 
-                           max="30" 
-                           value="${presentacion}"
-                           onchange="actualizarCriterioPrueba('${estudiante.id}', 'presentacion', this.value)">
-                </td>
-                <td class="col-total">
-                    <span class="total-prueba">${total}</span>/100
-                </td>
-                <td class="col-porcentaje">${aporte}</td>
-            </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-3">
+                <p><strong>Promedio del grupo:</strong> ${this.calcularPromedioGrupo(resultados).toFixed(2)}</p>
+                <p><strong>Aprobados:</strong> ${resultados.filter(r => r.estado === 'Aprobado').length} de ${resultados.length}</p>
+            </div>
         `;
-    });
-    
-    tbody.innerHTML = html;
-    
-    // Calcular estadísticas
-    if (totalPuntajes.length > 0) {
-        const promedio = (totalPuntajes.reduce((a, b) => a + b, 0) / totalPuntajes.length).toFixed(1);
-        const maximo = Math.max(...totalPuntajes);
-        const minimo = Math.min(...totalPuntajes);
-        const aportePromedio = (promedio * porcentaje / 100).toFixed(1);
         
-        document.getElementById('promedioPrueba').textContent = promedio;
-        document.getElementById('maximoPrueba').textContent = maximo;
-        document.getElementById('minimoPrueba').textContent = minimo;
-        document.getElementById('aportePrueba').textContent = aportePromedio;
-    }
-}
-
-function actualizarCriterioPrueba(estudianteId, criterio, valor) {
-    const periodo = sistemaFT.periodoActual;
-    const valorNum = parseInt(valor) || 0;
-    
-    if (!sistemaFT.pruebasEjecucion[periodo]) sistemaFT.pruebasEjecucion[periodo] = {};
-    
-    // Actualizar criterio específico
-    sistemaFT.pruebasEjecucion[periodo][estudianteId] = {
-        ...sistemaFT.pruebasEjecucion[periodo][estudianteId],
-        [criterio]: valorNum
-    };
-    
-    // Calcular total
-    const prueba = sistemaFT.pruebasEjecucion[periodo][estudianteId];
-    const total = (prueba.funcionalidad || 0) + (prueba.creatividad || 0) + (prueba.presentacion || 0);
-    sistemaFT.pruebasEjecucion[periodo][estudianteId].total = total;
-    
-    localStorage.setItem('ft_pruebas_ejecucion', JSON.stringify(sistemaFT.pruebasEjecucion));
-    
-    // Actualizar total en la interfaz
-    const fila = document.querySelector(`[data-estudiante="${estudianteId}"]`);
-    if (fila) {
-        const totalCell = fila.querySelector('.total-prueba');
-        if (totalCell) {
-            totalCell.textContent = total;
-        }
-        
-        // Recalcular aporte
-        const porcentaje = sistemaFT.nivelActual === 'I' ? 15 : 20;
-        const aporte = (total * porcentaje / 100).toFixed(1);
-        const aporteCell = fila.querySelector('.col-porcentaje');
-        if (aporteCell) {
-            aporteCell.textContent = aporte;
-        }
+        resultadosDiv.innerHTML = html;
+        this.mostrarNotificacion('Nota final calculada para todos los estudiantes', 'success');
     }
     
-    recalcularEstadisticasPrueba();
-}
-
-// ============================================
-// 7. MÓDULO DE PROYECTO CON DESIGN THINKING (30%)
-// ============================================
-
-async function cargarModuloProyecto() {
-    const contenedor = document.getElementById('contenedorPrincipal');
+    calcularNotaEstudiante(estudianteId) {
+        let nota = 0;
+        
+        // Trabajo Cotidiano
+        const promedioTC = this.calcularPromedioTC(estudianteId);
+        const porcentajeTC = this.getPorcentajeTC();
+        nota += (promedioTC / 3) * porcentajeTC;
+        
+        // Tareas (asumir 80% si no hay datos)
+        const notaTareas = this.obtenerNotaTareas(estudianteId) || 80;
+        nota += notaTareas * 0.10;
+        
+        // Asistencia (asumir 100% si no hay datos)
+        const notaAsistencia = this.obtenerNotaAsistencia(estudianteId) || 100;
+        nota += notaAsistencia * 0.10;
+        
+        // Proyecto o Prueba
+        if (this.currentCycle === 'III') {
+            const notaProyecto = this.obtenerNotaProyecto(estudianteId) || 70;
+            nota += notaProyecto * 0.30;
+        } else {
+            const porcentajePrueba = this.currentCycle === 'I' ? 0.15 : 0.20;
+            const notaPrueba = 70; // Valor por defecto
+            nota += notaPrueba * porcentajePrueba;
+        }
+        
+        return Math.min(100, Math.max(0, nota));
+    }
     
-    // Cargar estructura del proyecto
-    const proyectoData = await cargarDatosProyecto();
+    obtenerNotaTareas(estudianteId) {
+        // Implementar lógica real
+        return 80;
+    }
     
-    contenedor.innerHTML = `
-        <div class="modulo-proyecto">
-            <div class="modulo-header">
-                <button class="btn-volver" onclick="mostrarDashboardCompleto()">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <div>
-                    <h2><i class="fas fa-project-diagram"></i> Proyecto - Design Thinking</h2>
-                    <p class="modulo-subtitulo">30% de la nota final - Metodología por etapas</p>
-                </div>
-                <div class="modulo-actions">
-                    <button class="btn btn-primary" onclick="crearNuevoProyecto()">
-                        <i class="fas fa-plus"></i> Nuevo Proyecto
+    obtenerNotaAsistencia(estudianteId) {
+        // Implementar lógica real
+        return 100;
+    }
+    
+    obtenerNotaProyecto(estudianteId) {
+        // Implementar lógica real
+        return 70;
+    }
+    
+    calcularPromedioGrupo(resultados) {
+        const suma = resultados.reduce((total, r) => total + parseFloat(r.nota), 0);
+        return suma / resultados.length;
+    }
+    
+    generarReporte() {
+        alert('Generando reporte...');
+        // Implementar generación de reporte
+    }
+    
+    // ===== COMUNICACIÓN =====
+    cargarComunicacion() {
+        const container = document.getElementById('comunicacion-container');
+        
+        container.innerHTML = `
+            <div class="card">
+                <h4><i class="fas fa-comments"></i> Comunicación al Hogar</h4>
+                <p>Sistema de comunicación con padres y encargados.</p>
+                
+                <div class="mt-4">
+                    <div class="form-group">
+                        <label class="form-label">Seleccionar Estudiante</label>
+                        <select class="form-select" id="com-estudiante">
+                            <option value="">Seleccionar estudiante...</option>
+                            ${this.estudiantes.map(e => `<option value="${e.id || e.nombre}">${e.nombre}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Comunicación</label>
+                        <select class="form-select" id="com-tipo">
+                            <option value="mensaje">Mensaje general</option>
+                            <option value="felicitacion">Felicitación</option>
+                            <option value="llamado">Llamado de atención</option>
+                            <option value="reunion">Solicitud de reunión</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Mensaje</label>
+                        <textarea class="form-textarea" id="com-mensaje" rows="4" placeholder="Escriba el mensaje aquí..."></textarea>
+                    </div>
+                    
+                    <button class="btn-primary" onclick="sistema.enviarComunicacion()">
+                        <i class="fas fa-paper-plane"></i> Enviar Comunicación
                     </button>
                 </div>
             </div>
-            
-            <div class="proyecto-container">
-                <!-- Navegación por etapas -->
-                <div class="etapas-proyecto">
-                    <div class="etapas-nav">
-                        <button class="etapa-btn active" data-etapa="inicial" onclick="cambiarEtapaProyecto('inicial')">
-                            <i class="fas fa-play-circle"></i>
-                            <span>Etapa Inicial</span>
-                        </button>
-                        <button class="etapa-btn" data-etapa="desarrollo" onclick="cambiarEtapaProyecto('desarrollo')">
-                            <i class="fas fa-cogs"></i>
-                            <span>Etapa Desarrollo</span>
-                        </button>
-                        <button class="etapa-btn" data-etapa="final" onclick="cambiarEtapaProyecto('final')">
-                            <i class="fas fa-flag-checkered"></i>
-                            <span>Etapa Final</span>
-                        </button>
-                    </div>
-                    
-                    <div class="etapa-content" id="etapaInicial">
-                        <h3><i class="fas fa-play-circle"></i> Etapa Inicial - Empatizar y Definir</h3>
-                        ${generarFasesDesignThinking(['empatizar', 'definir'])}
-                    </div>
-                    
-                    <div class="etapa-content" id="etapaDesarrollo" style="display: none;">
-                        <h3><i class="fas fa-cogs"></i> Etapa Desarrollo - Idear y Prototipar</h3>
-                        ${generarFasesDesignThinking(['idear', 'prototipar'])}
-                    </div>
-                    
-                    <div class="etapa-content" id="etapaFinal" style="display: none;">
-                        <h3><i class="fas fa-flag-checkered"></i> Etapa Final - Evaluar</h3>
-                        ${generarFasesDesignThinking(['evaluar'])}
-                        <div class="evaluacion-final">
-                            <h4><i class="fas fa-clipboard-check"></i> Evaluación Final del Proyecto</h4>
-                            <div class="evaluacion-grid" id="evaluacionFinalProyecto">
-                                <!-- Evaluación por criterios -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Panel de evaluación -->
-                <div class="proyecto-evaluacion">
-                    <h3><i class="fas fa-users"></i> Evaluación por Equipo</h3>
-                    <div class="equipos-container" id="equiposProyecto">
-                        <!-- Equipos de trabajo -->
-                    </div>
-                    
-                    <div class="proyecto-summary">
-                        <h4><i class="fas fa-chart-pie"></i> Resumen del Proyecto</h4>
-                        <div class="summary-grid">
-                            <div class="summary-item">
-                                <span class="summary-label">Progreso General:</span>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="progresoProyecto" style="width: 30%"></div>
-                                </div>
-                                <span class="summary-value" id="porcentajeProgreso">30%</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">Equipos Activos:</span>
-                                <span class="summary-value" id="equiposActivos">3</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">Promedio Actual:</span>
-                                <span class="summary-value" id="promedioProyecto">0.0</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">30% Aporte:</span>
-                                <span class="summary-value" id="aporteProyecto">0.0</span>
-                            </div>
-                        </div>
-                        
-                        <div class="proyecto-actions">
-                            <button class="btn btn-primary" onclick="guardarProyecto()">
-                                <i class="fas fa-save"></i> Guardar Proyecto
-                            </button>
-                            <button class="btn btn-success" onclick="calcularNotaProyecto()">
-                                <i class="fas fa-calculator"></i> Calcular Nota
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+        `;
+    }
     
-    inicializarProyectoDesignThinking();
-}
-
-function generarFasesDesignThinking(fases) {
-    const fasesData = {
-        'empatizar': {
-            icon: 'fas fa-heart',
-            title: 'Empatizar',
-            desc: 'Comprender las necesidades del usuario',
-            indicadores: [
-                'Investiga y recopila información',
-                'Identifica necesidades reales',
-                'Crea perfil de usuario'
-            ]
-        },
-        'definir': {
-            icon: 'fas fa-bullseye',
-            title: 'Definir',
-            desc: 'Establecer el problema central',
-            indicadores: [
-                'Sintetiza la información',
-                'Define el problema claramente',
-                'Establece objetivos del proyecto'
-            ]
-        },
-        'idear': {
-            icon: 'fas fa-lightbulb',
-            title: 'Idear',
-            desc: 'Generar soluciones creativas',
-            indicadores: [
-                'Genera múltiples ideas',
-                'Usa técnicas de creatividad',
-                'Selecciona la mejor solución'
-            ]
-        },
-        'prototipar': {
-            icon: 'fas fa-cube',
-            title: 'Prototipar',
-            desc: 'Crear representaciones tangibles',
-            indicadores: [
-                'Desarrolla prototipo físico/digital',
-                'Itera basado en feedback',
-                'Documenta el proceso'
-            ]
-        },
-        'evaluar': {
-            icon: 'fas fa-check-double',
-            title: 'Evaluar',
-            desc: 'Probar y mejorar la solución',
-            indicadores: [
-                'Prueba con usuarios reales',
-                'Recopila y analiza feedback',
-                'Propone mejoras'
-            ]
+    enviarComunicacion() {
+        const estudiante = document.getElementById('com-estudiante').value;
+        const tipo = document.getElementById('com-tipo').value;
+        const mensaje = document.getElementById('com-mensaje').value;
+        
+        if (!estudiante || !mensaje) {
+            this.mostrarNotificacion('Complete todos los campos', 'warning');
+            return;
         }
-    };
+        
+        console.log('Enviando comunicación:', { estudiante, tipo, mensaje });
+        this.mostrarNotificacion('Comunicación enviada exitosamente', 'success');
+        
+        // Limpiar formulario
+        document.getElementById('com-mensaje').value = '';
+    }
     
-    return fases.map(fase => `
-        <div class="fase-card" data-fase="${fase}">
-            <div class="fase-header">
-                <div class="fase-icon">
-                    <i class="${fasesData[fase].icon}"></i>
-                </div>
-                <div>
-                    <h4>${fasesData[fase].title}</h4>
-                    <p>${fasesData[fase].desc}</p>
-                </div>
-                <div class="fase-status">
-                    <span class="status-badge completado">50%</span>
-                </div>
-            </div>
-            <div class="fase-indicadores">
-                <h5>Indicadores de evaluación:</h5>
-                <ul>
-                    ${fasesData[fase].indicadores.map(ind => `<li>${ind}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="fase-actions">
-                <button class="btn btn-sm btn-outline" onclick="evaluarFase('${fase}')">
-                    <i class="fas fa-edit"></i> Evaluar
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// ============================================
-// 8. CÁLCULO DE NOTA FINAL
-// ============================================
-
-function calcularNotaFinal() {
-    const contenedor = document.getElementById('contenedorPrincipal');
-    const periodo = sistemaFT.periodoActual;
-    const ciclo = sistemaFT.nivelActual || 'II';
+    // ===== DASHBOARD =====
+    actualizarDashboard() {
+        this.actualizarEstadisticas();
+        this.actualizarNotificaciones();
+    }
     
-    // Calcular promedios de cada componente
-    const promedioTC = calcularPromedioTrabajoCotidiano();
-    const promedioTareas = calcularPromedioTareas();
-    const promedioAsistencia = calcularPromedioAsistencia();
-    const promedioPruebaProyecto = calcularPromedioPruebaProyecto();
+    actualizarEstadisticas() {
+        // Total estudiantes
+        const totalStudents = document.getElementById('total-students');
+        if (totalStudents) totalStudents.textContent = this.estudiantes.length;
+        
+        // Promedio general
+        const avgGrade = document.getElementById('avg-grade');
+        if (avgGrade) avgGrade.textContent = '85.50'; // Valor de ejemplo
+        
+        // Tasa de asistencia
+        const attendanceRate = document.getElementById('attendance-rate');
+        if (attendanceRate) attendanceRate.textContent = '95%';
+        
+        // Tareas completadas
+        const tasksCompleted = document.getElementById('tasks-completed');
+        if (tasksCompleted) tasksCompleted.textContent = '78%';
+    }
     
-    // Aplicar porcentajes según ciclo
-    const porcentajes = obtenerPorcentajesCiclo(ciclo);
+    actualizarNotificaciones() {
+        const notifications = document.getElementById('notifications');
+        if (!notifications) return;
+        
+        // Limpiar notificaciones viejas
+        notifications.innerHTML = '';
+        
+        // Agregar notificaciones del sistema
+        const notifs = [
+            { icon: 'info-circle', type: 'info', text: 'Sistema FT-MEP Sprint 2 activo' },
+            { icon: 'calendar-check', type: 'success', text: 'Período actual: Semana 1' },
+            { icon: 'users', type: 'info', text: `${this.estudiantes.length} estudiantes cargados` }
+        ];
+        
+        notifs.forEach(notif => {
+            const div = document.createElement('div');
+            div.className = 'notification-item';
+            div.innerHTML = `
+                <i class="fas fa-${notif.icon} ${notif.type}"></i>
+                <span>${notif.text}</span>
+            `;
+            notifications.appendChild(div);
+        });
+    }
     
-    const notaFinal = (
-        (promedioTC * porcentajes.tc / 100) +
-        (promedioTareas * porcentajes.tareas / 100) +
-        (promedioAsistencia * porcentajes.asistencia / 100) +
-        (promedioPruebaProyecto * (ciclo === 'III' ? porcentajes.proyecto : porcentajes.prueba) / 100)
-    ).toFixed(1);
+    // ===== ACCIONES RÁPIDAS =====
+    ejecutarAccionRapida(accion) {
+        switch(accion) {
+            case 'new-task':
+                if (this.moduloTareas) {
+                    this.moduloTareas.mostrarModalNuevaTarea();
+                }
+                break;
+                
+            case 'mark-attendance':
+                if (this.moduloAsistencia) {
+                    this.moduloAsistencia.mostrarRegistroAsistencia();
+                }
+                break;
+                
+            case 'evaluate-tc':
+                this.cambiarSeccion('trabajo-cotidiano');
+                break;
+                
+            case 'view-reports':
+                this.cambiarSeccion('nota-final');
+                break;
+        }
+    }
     
-    contenedor.innerHTML = `
-        <div class="nota-final-container">
-            <div class="nota-final-header">
-                <button class="btn-volver" onclick="mostrarDashboardCompleto()">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
-                <h2><i class="fas fa-calculator"></i> Cálculo de Nota Final</h2>
-                <p>Ciclo ${ciclo} - Período: ${periodo}</p>
-            </div>
+    // ===== GESTIÓN DE PERÍODOS =====
+    cambiarPeriodo() {
+        const periodos = ['semana1', 'semana2', 'semana3', 'semana4', 'mes1', 'mes2', 'mes3'];
+        const currentIndex = periodos.indexOf(this.currentPeriod);
+        const nextIndex = (currentIndex + 1) % periodos.length;
+        
+        this.currentPeriod = periodos[nextIndex];
+        document.getElementById('current-period').textContent = `Período: ${this.currentPeriod.replace('semana', 'Semana ').replace('mes', 'Mes ')}`;
+        
+        this.mostrarNotificacion(`Cambiado a ${this.currentPeriod}`, 'info');
+        this.cargarEvaluacionesGuardadas();
+        
+        // Si estamos en trabajo cotidiano, regenerar tabla
+        if (document.getElementById('trabajo-cotidiano').classList.contains('active')) {
+            this.generarTablaEvaluacion();
+        }
+    }
+    
+    // ===== PERSISTENCIA =====
+    guardarTrabajoCotidiano() {
+        try {
+            const key = `ftmep_tc_${this.currentCycle}_${this.currentArea}_${this.currentPeriod}`;
+            localStorage.setItem(key, JSON.stringify(this.evaluaciones.trabajoCotidiano[this.currentPeriod]));
+            this.mostrarNotificacion('Evaluación guardada exitosamente', 'success');
+        } catch (error) {
+            console.error('Error guardando evaluación:', error);
+            this.mostrarNotificacion('Error al guardar la evaluación', 'danger');
+        }
+    }
+    
+    cargarEvaluacionesGuardadas() {
+        try {
+            const key = `ftmep_tc_${this.currentCycle}_${this.currentArea}_${this.currentPeriod}`;
+            const saved = localStorage.getItem(key);
             
-            <div class="componentes-nota">
-                <h3><i class="fas fa-puzzle-piece"></i> Componentes de Evaluación</h3>
-                
-                <div class="componente-card">
-                    <div class="componente-header">
-                        <h4>Trabajo Cotidiano</h4>
-                        <span class="componente-porcentaje">${porcentajes.tc}%</span>
-                    </div>
-                    <div class="componente-body">
-                        <div class="componente-stats">
-                            <span>Promedio: ${promedioTC}</span>
-                            <span>Aporte: ${(promedioTC * porcentajes.tc / 100).toFixed(1)}</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${promedioTC}%"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="componente-card">
-                    <div class="componente-header">
-                        <h4>Tareas</h4>
-                        <span class="componente-porcentaje">${porcentajes.tareas}%</span>
-                    </div>
-                    <div class="componente-body">
-                        <div class="componente-stats">
-                            <span>Promedio: ${promedioTareas}</span>
-                            <span>Aporte: ${(promedioTareas * porcentajes.tareas / 100).toFixed(1)}</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${promedioTareas}%"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="componente-card">
-                    <div class="componente-header">
-                        <h4>Asistencia</h4>
-                        <span class="componente-porcentaje">${porcentajes.asistencia}%</span>
-                    </div>
-                    <div class="componente-body">
-                        <div class="componente-stats">
-                            <span>Promedio: ${promedioAsistencia}%</span>
-                            <span>Aporte: ${(promedioAsistencia * porcentajes.asistencia / 100).toFixed(1)}</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${promedioAsistencia}%"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="componente-card">
-                    <div class="componente-header">
-                        <h4>${ciclo === 'III' ? 'Proyecto' : 'Prueba de Ejecución'}</h4>
-                        <span class="componente-porcentaje">${ciclo === 'III' ? porcentajes.proyecto : porcentajes.prueba}%</span>
-                    </div>
-                    <div class="componente-body">
-                        <div class="componente-stats">
-                            <span>Promedio: ${promedioPruebaProyecto}</span>
-                            <span>Aporte: ${(promedioPruebaProyecto * (ciclo === 'III' ? porcentajes.proyecto : porcentajes.prueba) / 100).toFixed(1)}</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${promedioPruebaProyecto}%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="resultado-final">
-                <div class="resultado-card ${parseFloat(notaFinal) >= 70 ? 'aprobado' : 'reprobado'}">
-                    <div class="resultado-icon">
-                        <i class="fas fa-${parseFloat(notaFinal) >= 70 ? 'trophy' : 'exclamation-triangle'}"></i>
-                    </div>
-                    <div class="resultado-content">
-                        <h3>Nota Final: ${notaFinal}</h3>
-                        <p>${parseFloat(notaFinal) >= 70 ? 'APROBADO' : 'REPROBADO'}</p>
-                        <small>Promedio del grupo - Ciclo ${ciclo}</small>
-                    </div>
-                    <div class="resultado-acciones">
-                        <button class="btn btn-primary" onclick="generarBoletas()">
-                            <i class="fas fa-print"></i> Generar Boletas
-                        </button>
-                        <button class="btn btn-outline" onclick="exportarNotasFinales()">
-                            <i class="fas fa-file-excel"></i> Exportar
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="nota-final-footer">
-                <p><i class="fas fa-info-circle"></i> Nota: Esta es la nota promedio del grupo. Para ver notas individuales, exporte el reporte completo.</p>
-            </div>
-        </div>
-    `;
-}
-
-function obtenerPorcentajesCiclo(ciclo) {
-    const porcentajes = {
-        'I': { tc: 65, tareas: 10, prueba: 15, asistencia: 10, proyecto: 0 },
-        'II': { tc: 60, tareas: 10, prueba: 20, asistencia: 10, proyecto: 0 },
-        'III': { tc: 50, tareas: 10, prueba: 0, asistencia: 10, proyecto: 30 }
-    };
-    return porcentajes[ciclo] || porcentajes['II'];
-}
-
-// ============================================
-// 9. FUNCIONES AUXILIARES Y UTILIDADES
-// ============================================
-
-function mostrarNotificacion(mensaje, tipo = 'info') {
-    const notificacion = document.createElement('div');
-    notificacion.className = `notificacion notificacion-${tipo}`;
-    notificacion.innerHTML = `
-        <i class="fas fa-${tipo === 'success' ? 'check-circle' : 
-                          tipo === 'error' ? 'exclamation-circle' : 
-                          tipo === 'warning' ? 'exclamation-triangle' : 
-                          'info-circle'}"></i>
-        <span>${mensaje}</span>
-    `;
+            if (saved) {
+                this.evaluaciones.trabajoCotidiano[this.currentPeriod] = JSON.parse(saved);
+                console.log('✅ Evaluaciones cargadas desde localStorage');
+            }
+        } catch (error) {
+            console.error('Error cargando evaluaciones:', error);
+        }
+    }
     
-    document.body.appendChild(notificacion);
+    // ===== UTILIDADES =====
+    mostrarNotificacion(mensaje, tipo = 'info') {
+        // Crear notificación
+        const notification = document.createElement('div');
+        notification.className = `notification-item`;
+        notification.innerHTML = `
+            <i class="fas fa-${this.getNotificationIcon(tipo)} ${tipo}"></i>
+            <span>${mensaje}</span>
+        `;
+        
+        // Agregar a la lista
+        const notifications = document.getElementById('notifications');
+        if (notifications) {
+            notifications.insertBefore(notification, notifications.firstChild);
+            
+            // Remover después de 5 segundos
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        // También mostrar en consola
+        console.log(`📢 ${mensaje}`);
+    }
     
-    setTimeout(() => notificacion.classList.add('mostrar'), 10);
-    setTimeout(() => {
-        notificacion.classList.remove('mostrar');
-        setTimeout(() => notificacion.remove(), 300);
-    }, 3000);
+    getNotificationIcon(tipo) {
+        switch(tipo) {
+            case 'success': return 'check-circle';
+            case 'warning': return 'exclamation-triangle';
+            case 'danger': return 'times-circle';
+            default: return 'info-circle';
+        }
+    }
+    
+    mostrarError(mensaje) {
+        this.mostrarNotificacion(mensaje, 'danger');
+        
+        // También mostrar en un modal si es crítico
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-exclamation-triangle text-danger"></i> Error</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>${mensaje}</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="this.closest('.modal').remove()">Aceptar</button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('modal-container').appendChild(modal);
+    }
 }
 
-function cambiarPeriodoGlobal(periodo) {
-    sistemaFT.periodoActual = periodo;
-    mostrarNotificacion(`Período cambiado a: ${periodo}`, 'info');
-    mostrarDashboardCompleto();
-}
+// ===== INICIALIZACIÓN GLOBAL =====
+let sistema;
 
-function seleccionarCiclo(ciclo) {
-    sistemaFT.nivelActual = ciclo;
-    mostrarNotificacion(`Ciclo ${ciclo} seleccionado`, 'success');
-    mostrarDashboardCompleto();
-}
-
-// ============================================
-// 10. INICIALIZACIÓN Y EXPORTACIÓN
-// ============================================
-
-// Hacer funciones globales
-window.mostrarDashboardCompleto = mostrarDashboardCompleto;
-window.cargarModuloEvaluacion = cargarModuloEvaluacion;
-window.seleccionarCiclo = seleccionarCiclo;
-window.cambiarPeriodoGlobal = cambiarPeriodoGlobal;
-window.calcularNotaFinal = calcularNotaFinal;
-window.cargarModuloTareas = cargarModuloTareas;
-window.cargarModuloAsistencia = cargarModuloAsistencia;
-window.cargarModuloPruebaEjecucion = cargarModuloPruebaEjecucion;
-window.cargarModuloProyecto = cargarModuloProyecto;
-
-// Funciónes para módulos específicos (placeholder)
-window.cambiarAsistencia = cambiarAsistencia;
-window.actualizarCalificacionTarea = actualizarCalificacionTarea;
-window.cambiarEstadoTarea = cambiarEstadoTarea;
-window.actualizarCriterioPrueba = actualizarCriterioPrueba;
-
-// Inicializar sistema
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', inicializarSistemaSprint2);
-} else {
-    inicializarSistemaSprint2();
-}
-
-console.log('✅ Sistema FT-MEP Sprint 2 cargado');
+document.addEventListener('DOMContentLoaded', () => {
+    sistema = new SistemaFTMEP();
+    
+    // Hacer disponible globalmente para los onclick
+    window.sistema = sistema;
+    
+    console.log('🎉 Sistema FT-MEP Sprint 2 listo para usar');
+});
