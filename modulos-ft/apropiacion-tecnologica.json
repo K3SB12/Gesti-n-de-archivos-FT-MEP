@@ -1,0 +1,134 @@
+{
+  "nombre": "Apropiación tecnológica y digital",
+  "descripcion": "Desarrollo de habilidades para el uso efectivo, crítico, seguro y creativo de tecnologías digitales en contextos personales, académicos y sociales.",
+  "icono": "fa-laptop",
+  "resultados_aprendizaje": {
+    "Materno Infantil/Transición": "Identifica los dispositivos digitales considerando características funcionales, experimentando su utilidad y reconociendo la autoría, durante la accesibilidad, interacción y comunicación en la creación de recursos digitales.",
+    "I Ciclo": "Selecciona los dispositivos digitales y herramientas de productividad, mediante el uso de software y hardware, en la creación de archivos, creación y edición de contenido multimedia, aprovechando Internet y respetando la propiedad intelectual en la realización de tareas para la accesibilidad a la información de forma segura y responsable.",
+    "II Ciclo": "Selecciona la configuración de programas locales y en línea para su correcto uso al crear, buscar, compartir, organizar y administrar información en la realización de diferentes tareas de manera comprensiva, segura y responsable.",
+    "III Ciclo": "Configura programas locales y en línea para su correcto uso al crear, buscar, compartir, organizar y administrar información en la realización de diferentes tareas de manera comprensiva, segura y responsable."
+  },
+  "contenidos": {
+    "materno": {
+      "Módulo 1": [
+        {
+          "saber": "Computadora",
+          "indicador": "Identificar qué es una computadora y algunas de sus características, a partir de experiencias prácticas de interacción con dispositivos digitales.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica y nombra verbalmente o señalando al menos tres partes principales de una computadora (como pantalla, teclado, ratón/touchpad) y describe su función básica de forma autónoma (ej: 'con el ratón hago clic').",
+              "evidencia_tipica": "Señala las partes correctas en un dispositivo real o en una imagen cuando se le pregunta, explicando para qué sirven."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Identifica 1 o 2 partes con apoyo de preguntas guía o opciones visuales. Reconoce su función general pero con vocabulario limitado o necesita confirmación.",
+              "evidencia_tipica": "Elige la imagen correcta entre varias opciones o contesta preguntas cerradas con ayuda."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Muestra familiarización con el objeto global ('computadora') pero no logra identificar partes específicas o confunde sus nombres y funciones. Requiere apoyo constante y modelado.",
+              "evidencia_tipica": "Reconoce el objeto pero señala partes incorrectas o no responde a preguntas específicas."
+            }
+          }
+        },
+        {
+          "saber": "Software",
+          "indicador": "Reconocer elementos visuales básicos de la interfaz de software (iconos, botones, ventanas), interactuando con ellos mediante el uso guiado de dispositivos digitales.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Distingue y nombra correctamente iconos, botones y ventanas en una interfaz sencilla. Sigue instrucciones básicas para interactuar con ellos (ej: hacer clic en el icono 'X' para cerrar) de manera independiente.",
+              "evidencia_tipica": "Ejecuta acciones simples solicitadas (abrir, cerrar, minimizar) en un programa guiado."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce algunos elementos cuando se le señalan y los nombra con apoyo. Sigue instrucciones paso a paso con supervisión cercana.",
+              "evidencia_tipica": "Logra la interacción después de que el docente modela la acción o le señala el elemento específico."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Confunde los elementos de la interfaz o no logra asociar el nombre con el objeto visual. Necesita ayuda física o guía constante para realizar cualquier interacción.",
+              "evidencia_tipica": "Hace clic al azar o no responde a instrucciones específicas sobre la interfaz."
+            }
+          }
+        }
+      ]
+    },
+    "1": {
+      "Módulo 1": [
+        {
+          "saber": "Computadora",
+          "indicador": "Reconocer la computadora como una herramienta tecnológica, identificando sus características básicas, funciones e importancia en la vida cotidiana, por medio de la observación y manipulación práctica.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Describe la computadora como herramienta tecnológica, enumera varias de sus funciones (escribir, dibujar, buscar información) y da ejemplos concretos de su importancia en la vida diaria (ej: 'mi mamá la usa para trabajar') de forma clara y autónoma.",
+              "evidencia_tipica": "Explicación oral o dibujo comentado que relaciona la computadora con actividades cotidianas específicas."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Identifica a la computadora como herramienta y menciona 1 o 2 funciones generales. Relaciona su importancia con ejemplos muy comunes o sugeridos por el docente.",
+              "evidencia_tipica": "Respuestas a preguntas guías o completar frases con opciones dadas."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Reconoce físicamente la computadora pero no puede explicar sus funciones o importancia más allá de 'sirve para jugar'. La descripción es vaga o imprecisa.",
+              "evidencia_tipica": "Responde con monosílabos o frases muy generales como 'es importante', sin poder especificar."
+            }
+          }
+        }
+      ]
+    },
+    "4": {
+      "Módulo 1": [
+        {
+          "saber": "Hardware",
+          "indicador": "Clasificar componentes de hardware según su función, distinguiendo entre dispositivos computacionales (computadoras de escritorio, portátiles, teléfonos inteligentes, tabletas) y periféricos (parlantes, micrófonos, audífonos, impresora, cámara, dispositivos de almacenamiento local), en función de su uso en contextos cotidianos.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Clasifica correctamente una variedad de dispositivos en las categorías de 'dispositivo computacional' y 'periférico', explicando la diferencia principal (ej: 'el periférico se conecta a la computadora principal'). Da ejemplos de uso contextual apropiados para cada uno.",
+              "evidencia_tipica": "Tabla o lista de clasificación hecha por el estudiante con ejemplos correctos y explicaciones breves."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Clasifica la mayoría de los dispositivos comunes correctamente, pero con algunos errores en casos límite (ej: una tableta). Explica la diferencia con cierta ayuda o usando vocabulario proporcionado.",
+              "evidencia_tipica": "Ejercicio de unir dispositivos con su categoría, cometiendo 1 o 2 errores."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Confunde las categorías de forma significativa o no logra aplicar el criterio de clasificación. Necesita revisar ejemplos modelo para intentar la tarea.",
+              "evidencia_tipica": "Lista desorganizada o clasificación con múltiples errores que indican no haber comprendido la diferencia fundamental."
+            }
+          }
+        }
+      ]
+    },
+    "7": {
+      "Módulo 1": [
+        {
+          "saber": "Redes de comunicación",
+          "indicador": "Identificar tipos de redes de comunicación y sus dispositivos principales (módem, router y puntos de acceso), explicando su funcionamiento y principios de comunicación durante la conexión a Internet en contextos cotidianos.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Diferencia tipos de redes (LAN, WAN, inalámbrica), identifica y describe la función específica de módem, router y punto de acceso en el hogar o escuela. Explica el principio básico de comunicación (ej: 'el router distribuye la señal').",
+              "evidencia_tipica": "Diagrama sencillo creado por el estudiante etiquetando dispositivos y explicando su rol en la conexión a Internet."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce los dispositivos más comunes (router) y los asocia a la conexión a Internet. Diferencia redes cableadas e inalámbricas, pero su explicación del funcionamiento es parcial o con imprecisiones.",
+              "evidencia_tipica": "Respuestas correctas a preguntas de selección múltiple o identificar dispositivos en una imagen."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Reconoce vagamente el concepto de 'Internet' pero confunde los dispositivos o no puede explicar sus funciones. No logra diferenciar tipos de redes.",
+              "evidencia_tipica": "No puede nombrar dispositivos correctamente o los describe con funciones erróneas (ej: 'el módem es el wifi')."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
