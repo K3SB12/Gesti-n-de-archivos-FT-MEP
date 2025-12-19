@@ -1,0 +1,134 @@
+{
+  "nombre": "Ciencia de datos e Inteligencia artificial",
+  "descripcion": "Exploración del ciclo de vida de los datos y fundamentos de la inteligencia artificial, desarrollando habilidades para analizar información, reconocer patrones y comprender el impacto ético de estas tecnologías.",
+  "icono": "fa-brain",
+  "resultados_aprendizaje": {
+    "Materno Infantil/Transición": "Reconoce los conceptos básicos relacionados con la recopilación, organización e interpretación de datos, mediante gráficos pictóricos en la resolución de problemas, fomentando el pensamiento crítico y la curiosidad hacia el mundo que lo rodea.",
+    "I Ciclo": "Reconoce los fundamentos de la inteligencia artificial y su presencia en la vida cotidiana, mediante ejemplos concretos como asistentes virtuales, valorando el uso seguro y responsable de estas tecnologías.",
+    "II Ciclo": "Reconoce el uso de la inteligencia artificial en contextos cotidianos y aplica técnicas básicas de recolección, análisis y representación de datos mediante tablas y gráficos.",
+    "III Ciclo": "Aplica técnicas de ciencia de datos para analizar información de su contexto, y evalúa críticamente el funcionamiento, aplicaciones e implicaciones éticas de sistemas de inteligencia artificial."
+  },
+  "contenidos": {
+    "materno": {
+      "Módulo 2": [
+        {
+          "saber": "Dato",
+          "indicador": "Identificar el dato y su importancia en situaciones cotidianas, reconociendo diferentes tipos como texto, imagen, sonido o video.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica datos en su entorno (la hora en un reloj, su nombre escrito, una foto) y los clasifica por tipo (número, letra, dibujo, sonido). Explica con ejemplos simples por qué son importantes ('sabemos qué hora es').",
+              "evidencia_tipica": "Crea un 'collage de datos' pegando recortes que representen diferentes tipos (número de revista, foto, onomatopeya) y los comenta."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce datos obvios cuando se le señalan (su nombre). Clasifica con ayuda (¿esto es un dibujo o un número?). La explicación de su importancia es vaga ('sirven').",
+              "evidencia_tipica": "Agrupa imágenes pre-dadas en categorías 'números' y 'dibujos' con algún error."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "No distingue entre un dato y un objeto común. Confunde el tipo de dato o no logra dar ejemplos. Requiere que se le muestre repetidamente el concepto.",
+              "evidencia_tipica": "Señala un lápiz y dice 'es un dato' o no puede clasificar una imagen claramente numérica."
+            }
+          }
+        },
+        {
+          "saber": "Estrategias para presentar datos",
+          "indicador": "Reconocer gráficos pictóricos como estrategia para representar datos recolectados en actividades lúdicas.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica un gráfico pictórico (ej: fila de caritas para votar por una fruta) y explica que muestra 'cuántos eligieron cada cosa'. Puede 'leer' información simple de él ('más personas likes manzanas').",
+              "evidencia_tipica": "Interpreta correctamente un gráfico pictórico del grupo respondiendo preguntas como '¿qué fruta tiene más dibujos?'."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce que el gráfico representa algo, pero puede confundirse al extraer la cantidad comparativa. Necesita preguntas guía muy concretas.",
+              "evidencia_tipica": "Señala la fila más larga pero no puede decir cuántos elementos hay o se equivoca al contar."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Ve el gráfico como un conjunto de dibujos sin relación cuantitativa. No extrae información de él.",
+              "evidencia_tipica": "Nombra los dibujos que ve ('una manzana, un banano') pero no los relaciona con un conteo o preferencia."
+            }
+          }
+        }
+      ]
+    },
+    "1": {
+      "Módulo 2": [
+        {
+          "saber": "Fundamentos de la IA",
+          "indicador": "Reconocer los fundamentos de la inteligencia artificial a través de objetos o situaciones del entorno donde esta tecnología está presente, mediante actividades guiadas con apoyo visual o audiovisual.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica y da ejemplos de IA en su vida (recomendaciones de videos, asistentes de voz, filtros de foto) y da una explicación básica correcta ('es como una computadora que aprende').",
+              "evidencia_tipica": "Dibuja o describe una situación donde ha interactuado con IA y explica qué hacía 'la máquina'."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce ejemplos que el docente presenta, pero tiene dificultad para encontrar nuevos por su cuenta. Su explicación es muy simple o repetitiva ('es inteligente').",
+              "evidencia_tipica": "Señala el altavoz inteligente en clase cuando se le pregunta, pero no puede pensar en otro ejemplo en casa."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Confunde IA con cualquier tecnología o robot. No logra articular una característica distintiva.",
+              "evidencia_tipica": "Dice que su videojuego favorito o un reloj digital son 'inteligencia artificial'."
+            }
+          }
+        }
+      ]
+    },
+    "4": {
+      "Módulo 2": [
+        {
+          "saber": "Fundamentos de la IA",
+          "indicador": "Identificar los fundamentos de la inteligencia artificial, reconociendo cómo aprende, toma decisiones y se diferencia de otros sistemas automatizados en contextos cotidianos.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Explica que la IA 'aprende de datos' y 'toma decisiones basadas en patrones'. Diferencia una puerta automática (automática) de un reconocimiento facial (IA) porque la segunda 'reconoce patrones'.",
+              "evidencia_tipica": "Compara dos sistemas (ej: lavadora automática vs. traductor online) señalando cuál usa IA y por qué."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Comprende que la IA 'aprende', pero no puede explicar el proceso. Diferencia ejemplos claros, pero se confunde con sistemas programados con reglas fijas complejas.",
+              "evidencia_tipica": "Identifica correctamente el asistente de voz como IA, pero también clasifica un semáforo con sensor como IA."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "No identifica la característica de aprendizaje. Para el estudiante, cualquier automatización compleja es 'IA'.",
+              "evidencia_tipica": "Considera que un programa de cálculo predefinido o un robot de ensamblaje con movimientos fijos es IA."
+            }
+          }
+        }
+      ]
+    },
+    "7": {
+      "Módulo 2": [
+        {
+          "saber": "Dato (Ciencias de datos)",
+          "indicador": "Identificar tipos de dato (numéricos, de texto, de ubicación y de imágenes), analizando cómo influye en decisiones y/o comportamientos en redes sociales, historiales de navegación o sistemas de localización.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Clasifica datos de un caso real (ej: perfil de red social: edad=número, bio=texto, foto=imagen, check-in=ubicación). Analiza cómo cada tipo puede usarse para decisiones (recomendar amigos por ubicación, anuncios por edad).",
+              "evidencia_tipica": "Presentación breve o mapa conceptual que desglosa los datos de un servicio digital y su potencial uso."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Clasifica correctamente los tipos de datos básicos. Entiende que se usan para decisiones, pero el análisis es superficial y no vincula tipos específicos con usos específicos.",
+              "evidencia_tipica": "Tabla de clasificación de datos de ejemplo, con una explicación genérica como 'las empresas los usan para saber qué nos gusta'."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Clasifica con errores (ej: confunde un código numérico con texto). No establece una relación clara entre el dato y su influencia en decisiones automatizadas.",
+              "evidencia_tipica": "Lista datos sueltos sin categorizar correctamente y sin poder explicar su utilidad más allá de 'se guardan'."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
