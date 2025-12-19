@@ -1,0 +1,90 @@
+{
+  "proyectos_ejemplo": [
+    {
+      "id": "proj-1",
+      "nombre": "App Educativa sobre Reciclaje",
+      "descripcion": "Aplicación móvil que enseña sobre reciclaje mediante juegos interactivos",
+      "equipos": [
+        {
+          "id": "equipo-1",
+          "nombre": "EcoInnovadores",
+          "estudiantes": ["1", "2", "3"],
+          "etapa_actual": "prototipar",
+          "progreso": 65,
+          "calificacion_parcial": 85
+        },
+        {
+          "id": "equipo-2",
+          "nombre": "TechVerde",
+          "estudiantes": ["4", "5"],
+          "etapa_actual": "idear",
+          "progreso": 45,
+          "calificacion_parcial": 72
+        }
+      ],
+      "fechas": {
+        "inicio": "2024-03-01",
+        "entrega": "2024-05-15",
+        "presentacion": "2024-05-20"
+      },
+      "recursos": [
+        "App Inventor",
+        "Diseño de interfaces",
+        "Programación por bloques"
+      ]
+    },
+    {
+      "id": "proj-2",
+      "nombre": "Robot Seguidor de Línea",
+      "descripcion": "Robot autónomo que sigue una línea negra usando sensores infrarrojos",
+      "equipos": [
+        {
+          "id": "equipo-3",
+          "nombre": "RoboMinds",
+          "estudiantes": ["6", "7", "8"],
+          "etapa_actual": "evaluar",
+          "progreso": 85,
+          "calificacion_parcial": 92
+        }
+      ],
+      "fechas": {
+        "inicio": "2024-03-10",
+        "entrega": "2024-05-25",
+        "presentacion": "2024-05-30"
+      },
+      "recursos": [
+        "Kit de robótica",
+        "Arduino",
+        "Sensores IR",
+        "Motores DC"
+      ]
+    }
+  ],
+  "indicadores_evaluacion": {
+    "empatizar": [
+      "Entrevistas realizadas",
+      "Observaciones registradas",
+      "Perfil de usuario creado"
+    ],
+    "definir": [
+      "Problema claramente definido",
+      "Objetivos específicos",
+      "Alcance del proyecto"
+    ],
+    "idear": [
+      "Brainstorming realizado",
+      "Ideas generadas (mínimo 5)",
+      "Selección justificada"
+    ],
+    "prototipar": [
+      "Prototipo funcional",
+      "Iteraciones documentadas",
+      "Feedback incorporado"
+    ],
+    "evaluar": [
+      "Pruebas con usuarios",
+      "Análisis de resultados",
+      "Propuestas de mejora"
+    ]
+  }
+}
