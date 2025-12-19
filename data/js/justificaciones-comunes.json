@@ -1,0 +1,94 @@
+{
+  "justificaciones": [
+    {
+      "id": "just-1",
+      "texto": "Enfermedad comprobada",
+      "requiere_comprobante": true,
+      "categoria": "salud"
+    },
+    {
+      "id": "just-2",
+      "texto": "Cita médica programada",
+      "requiere_comprobante": true,
+      "categoria": "salud"
+    },
+    {
+      "id": "just-3",
+      "texto": "Problemas familiares",
+      "requiere_comprobante": false,
+      "categoria": "familia"
+    },
+    {
+      "id": "just-4",
+      "texto": "Problemas de transporte",
+      "requiere_comprobante": false,
+      "categoria": "transporte"
+    },
+    {
+      "id": "just-5",
+      "texto": "Participación en actividades escolares",
+      "requiere_comprobante": true,
+      "categoria": "escolar"
+    },
+    {
+      "id": "just-6",
+      "texto": "Emergencia familiar",
+      "requiere_comprobante": false,
+      "categoria": "familia"
+    },
+    {
+      "id": "just-7",
+      "texto": "Permiso especial de dirección",
+      "requiere_comprobante": true,
+      "categoria": "administrativo"
+    },
+    {
+      "id": "just-8",
+      "texto": "Clima/Desastre natural",
+      "requiere_comprobante": false,
+      "categoria": "clima"
+    },
+    {
+      "id": "just-9",
+      "texto": "Acompañamiento familiar",
+      "requiere_comprobante": false,
+      "categoria": "familia"
+    },
+    {
+      "id": "just-10",
+      "texto": "Otra (especificar)",
+      "requiere_comprobante": false,
+      "categoria": "otra"
+    }
+  ],
+  "categorias": {
+    "salud": {
+      "color": "#dc3545",
+      "icono": "fas fa-heartbeat"
+    },
+    "familia": {
+      "color": "#17a2b8",
+      "icono": "fas fa-home"
+    },
+    "transporte": {
+      "color": "#ffc107",
+      "icono": "fas fa-bus"
+    },
+    "escolar": {
+      "color": "#28a745",
+      "icono": "fas fa-graduation-cap"
+    },
+    "administrativo": {
+      "color": "#6f42c1",
+      "icono": "fas fa-file-alt"
+    },
+    "clima": {
+      "color": "#20c997",
+      "icono": "fas fa-cloud-rain"
+    },
+    "otra": {
+      "color": "#6c757d",
+      "icono": "fas fa-ellipsis-h"
+    }
+  }
+}
