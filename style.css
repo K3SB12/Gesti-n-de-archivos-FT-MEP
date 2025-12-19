@@ -950,3 +950,587 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* =========================================== */
+/* ESTILOS PARA EL SPRINT 1 - EVALUACIÓN FT-MEP */
+/* =========================================== */
+
+/* 1. VISTA DE EVALUACIÓN */
+.evaluacion-vista {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.evaluacion-header {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.evaluacion-subtitulo {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.badge-ciclo, .badge-grado, .badge-porcentaje {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.badge-ciclo {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.badge-grado {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-porcentaje {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.periodo-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.periodo-selector select {
+    padding: 8px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    font-size: 0.95em;
+    cursor: pointer;
+}
+
+/* 2. CONTENEDOR DE RDA */
+.rda-container {
+    background: #f8f9fa;
+    border-left: 4px solid #3498db;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.rda-container h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rda-texto {
+    color: #495057;
+    line-height: 1.6;
+    font-size: 0.95em;
+}
+
+/* 3. HERRAMIENTAS DE EVALUACIÓN */
+.herramientas-evaluacion {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.instruccion {
+    color: #6c757d;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.nivel-badge {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nivel-alto {
+    background: #d4edda;
+    color: #155724;
+}
+
+.nivel-medio {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.nivel-bajo {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.herramientas-acciones {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+/* 4. TABLA DE EVALUACIÓN */
+.tabla-container {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+}
+
+.tabla-evaluacion-scroll {
+    overflow-x: auto;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.tabla-evaluacion {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.tabla-evaluacion th {
+    background: #2c3e50;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px 10px;
+    font-size: 0.9em;
+    position: relative;
+    border-right: 1px solid #34495e;
+}
+
+.tabla-evaluacion th:last-child {
+    border-right: none;
+}
+
+.col-estudiante {
+    min-width: 200px;
+    text-align: left !important;
+    padding-left: 20px !important;
+}
+
+.col-indicador {
+    min-width: 100px;
+    max-width: 120px;
+}
+
+.indicador-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.indicador-num {
+    background: rgba(255,255,255,0.2);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+}
+
+.indicador-text {
+    font-size: 0.8em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.btn-info-indicador {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    font-size: 0.8em;
+    padding: 2px;
+}
+
+.btn-info-indicador:hover {
+    color: white;
+}
+
+/* Celdas sticky */
+.sticky {
+    position: sticky;
+    z-index: 10;
+}
+
+.col-estudiante.sticky {
+    left: 0;
+    background: #2c3e50;
+}
+
+.col-promedio.sticky,
+.col-porcentaje.sticky,
+.col-nivel.sticky {
+    right: 0;
+    background: #2c3e50;
+}
+
+/* 5. CUERPO DE LA TABLA */
+.tabla-evaluacion td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #e9ecef;
+    border-right: 1px solid #e9ecef;
+    transition: background 0.2s;
+}
+
+.tabla-evaluacion tr:hover td {
+    background: #f8f9fa;
+}
+
+.tabla-evaluacion td:last-child {
+    border-right: none;
+}
+
+.estudiante-info {
+    text-align: left;
+}
+
+.estudiante-info strong {
+    display: block;
+    color: #2c3e50;
+    font-size: 0.95em;
+}
+
+.estudiante-info small {
+    color: #6c757d;
+    font-size: 0.8em;
+}
+
+/* 6. CELDAS DE CALIFICACIÓN */
+.celda-calificacion {
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    font-size: 1.1em;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.celda-calificacion:hover {
+    background: #e3f2fd !important;
+}
+
+.celda-calificacion.nivel-3 {
+    background: #d4edda;
+    color: #155724;
+}
+
+.celda-calificacion.nivel-2 {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.celda-calificacion.nivel-1 {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.valor-calificacion {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.1);
+}
+
+/* 7. SELECTOR DE CALIFICACIÓN */
+.selector-calificacion {
+    position: absolute;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 150px;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.selector-header {
+    background: #2c3e50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+}
+
+.btn-cerrar-selector {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.selector-opciones {
+    padding: 10px;
+}
+
+.opcion-nivel {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.opcion-nivel:hover {
+    transform: translateY(-2px);
+}
+
+.opcion-nivel.nivel-alto {
+    background: #d4edda;
+    color: #155724;
+}
+
+.opcion-nivel.nivel-medio {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.opcion-nivel.nivel-bajo {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.opcion-nivel.nivel-vacio {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px dashed #dee2e6;
+}
+
+/* 8. BADGES DE NIVEL FINAL */
+.badge-nivel {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-nivel.alto {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-nivel.medio {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-nivel.bajo {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* 9. RESUMEN DE EVALUACIÓN */
+.resumen-evaluacion {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.resumen-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.resumen-stats .stat-card {
+    flex: 1;
+    min-width: 150px;
+}
+
+/* 10. NOTIFICACIONES */
+.notificacion {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10000;
+    transform: translateX(150%);
+    transition: transform 0.3s ease;
+}
+
+.notificacion.mostrar {
+    transform: translateX(0);
+}
+
+.notificacion-success {
+    border-left: 4px solid #28a745;
+    color: #155724;
+}
+
+.notificacion-info {
+    border-left: 4px solid #17a2b8;
+    color: #0c5460;
+}
+
+/* 11. SELECTOR DE EVALUACIÓN */
+.selector-evaluacion {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.selector-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.areas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.area-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 3px solid transparent;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.area-card:hover {
+    border-color: #3498db;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.area-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.area-icon i {
+    font-size: 2em;
+    color: white;
+}
+
+.area-card h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.area-card p {
+    color: #7f8c8d;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+/* 12. RESPONSIVE */
+@media (max-width: 768px) {
+    .evaluacion-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .periodo-selector {
+        align-self: stretch;
+    }
+    
+    .periodo-selector select {
+        flex: 1;
+    }
+    
+    .tabla-evaluacion th,
+    .tabla-evaluacion td {
+        padding: 8px 5px;
+        font-size: 0.85em;
+    }
+    
+    .col-estudiante {
+        min-width: 150px;
+    }
+    
+    .col-indicador {
+        min-width: 80px;
+    }
+    
+    .areas-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Estados de carga */
+.cargando-tabla {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.cargando-tabla i {
+    font-size: 2em;
+    margin-bottom: 15px;
+    display: block;
+}
+
+
