@@ -1,0 +1,88 @@
+{
+  "nombre": "Computación física y Robótica",
+  "descripcion": "Integración de hardware y software para crear sistemas interactivos, automatizados y robóticos, comprendiendo los principios de electrónica, sensores, actuadores y control.",
+  "icono": "fa-robot",
+  "resultados_aprendizaje": {
+    "Materno Infantil/Transición": "Reconoce el funcionamiento de los robots, así como sus componentes (cuerpo, sistema sensorial, sistemas de control), al clasificarlos por su uso y programarlos para resolver retos.",
+    "I Ciclo": "No aplica para este ciclo.",
+    "II Ciclo": "Crea algoritmos que permiten la simulación de comportamientos de aparatos tecnológicos, aplicando elementos de computación física, programación y electrónica para la resolución de un problema.",
+    "III Ciclo": "Diseña, construye y programa sistemas robóticos o de computación física integrando sensores y actuadores, para proponer soluciones automatizadas a problemas identificados en su contexto."
+  },
+  "contenidos": {
+    "materno": {
+      "Módulo 2": [
+        {
+          "saber": "Robot",
+          "indicador": "Reconocer qué es un robot, sus componentes y algunos de sus usos, mediante actividades lúdicas de exploración o programación guiada.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica objetos como robots (juguete, aspiradora automática) y nombra partes básicas (ruedas, brazos, 'ojos' sensores). Da ejemplos simples de su uso ('limpia solo', 'juega').",
+              "evidencia_tipica": "Clasifica imágenes en 'robot' y 'no robot' explicando brevemente su elección, o describe el uso de un robot visto en un video."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Reconoce un robot cuando se le muestra un ejemplo claro. Señala alguna parte si se le pregunta, pero no puede explicar su uso de forma específica.",
+              "evidencia_tipica": "Señala el robot entre varios juguetes y dice 'ese se mueve solo'."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Confunde robots con otros juguetes o máquinas electrónicas. No identifica características distintivas. Su concepto de robot es muy difuso.",
+              "evidencia_tipica": "Llama 'robot' a cualquier juguete con pilas o a una figura de acción estática."
+            }
+          }
+        }
+      ]
+    },
+    "4": {
+      "Módulo 1": [
+        {
+          "saber": "Robot",
+          "indicador": "Reconocer qué es un robot, sus tipos y componentes (cuerpo, sistema sensorial y sistema de control), diferenciándolo de otros dispositivos no robóticos.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Define un robot como una máquina programable que percibe y actúa. Clasifica ejemplos (brazo industrial, drone, aspiradora) y describe la función de sus sistemas (sensorial: siente; de control: piensa; cuerpo: actúa).",
+              "evidencia_tipica": "Tabla comparativa donde diferencia un robot de una licuadora o un reloj, mencionando los sistemas clave."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Da una definición básica y clasifica ejemplos obvios, pero tiene dificultad con casos límite. Nombra algunos componentes pero no los asocia claramente a un sistema.",
+              "evidencia_tipica": "Lista correctamente robots conocidos, pero no puede explicar por qué un reloj automático no es un robot de manera técnica."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Su definición se centra solo en la apariencia (parece humano o animal) o en el movimiento. No logra identificar los sistemas componentes.",
+              "evidencia_tipica": "Considera que un carro a control remoto es un robot, pero no una lavadora automática programable."
+            }
+          }
+        }
+      ]
+    },
+    "7": {
+      "Módulo 1": [
+        {
+          "saber": "Computación física",
+          "indicador": "Reconocer los componentes básicos de la computación física, como el microcontrolador, sensores, actuadores y el entorno de programación, relacionándolos con sus usos y aplicaciones en contextos cotidianos.",
+          "criterios_evaluacion": {
+            "alto": {
+              "nivel": 3,
+              "descriptor": "Identifica y describe la función de cada componente clave: microcontrolador (cerebro), sensores (entrada/ven), actuadores (salida/hacen), software (instrucciones). Relaciona cada uno con ejemplos reales (sensor de luz en un poste, actuador en una puerta automática).",
+              "evidencia_tipica": "Diagrama de un sistema simple (ej: alarma con sensor de movimiento) etiquetando correctamente cada componente y su flujo de información."
+            },
+            "medio": {
+              "nivel": 2,
+              "descriptor": "Nombra los componentes pero puede confundir sensores con actuadores. Da ejemplos de su uso, pero la relación no es precisa o falta algún elemento del ecosistema.",
+              "evidencia_tipica": "Lista componentes y ejemplos, pero en un caso práctico propone usar un LED (actuador) como sensor."
+            },
+            "bajo": {
+              "nivel": 1,
+              "descriptor": "Reconoce términos sueltos pero no comprende sus funciones interrelacionadas. Los ejemplos son incorrectos o muy alejados del concepto de computación física.",
+              "evidencia_tipica": "No puede diferenciar entre el hardware (placa) y el software que lo programa."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
