@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema FT-MEP Sprint 2 - Evaluación Integral</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-sprint2.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="assets/icons/ft-favicon.ico">
+</head>
+<body>
+
+    <!-- Header del Sistema -->
+    <header class="header-sistema">
+        <div class="container">
+            <div class="logo-header">
+                <h1><i class="fas fa-laptop-code"></i> Sistema FT-MEP <span class="version-badge">Sprint 2</span></h1>
+                <p class="subtitulo-header">Evaluación Integral - MEP Costa Rica</p>
+            </div>
+            
+            <!-- Navegación Principal -->
+            <nav class="nav-principal">
+                <a href="#" onclick="mostrarDashboardCompleto()" class="nav-link active">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a href="#" onclick="seleccionarCiclo('I')" class="nav-link">
+                    <i class="fas fa-child"></i> I Ciclo
+                </a>
+                <a href="#" onclick="seleccionarCiclo('II')" class="nav-link">
+                    <i class="fas fa-user-graduate"></i> II Ciclo
+                </a>
+                <a href="#" onclick="seleccionarCiclo('III')" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i> III Ciclo
+                </a>
+                <div class="nav-actions">
+                    <button class="btn btn-sm btn-primary" onclick="calcularNotaFinal()">
+                        <i class="fas fa-calculator"></i> Nota Final
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <div class="container">
+            <div id="breadcrumb">
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-home"></i> Inicio
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <main class="container">
+        <div id="contenedorPrincipal">
+            <!-- Aquí se cargará el dashboard dinámicamente -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-sistema">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3><i class="fas fa-laptop-code"></i> FT-MEP</h3>
+                    <p>Sistema de Evaluación Integral<br>Formación Tecnológica - Sprint 2</p>
+                </div>
+                <div class="footer-info">
+                    <p><i class="fas fa-info-circle"></i> Sistema v2.0 - REA MEP AC-CSE-259-28-2023</p>
+                    <p><i class="fas fa-calendar"></i> 2024 - Todos los derechos reservados</p>
+                </div>
+                <div class="footer-stats">
+                    <div class="stat-mini">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Trabajo Cotidiano: Implementado</span>
+                    </div>
+                    <div class="stat-mini">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Componentes Sumativos: Completos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts del Sistema -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Script Principal Sprint 2 -->
+    <script src="app-sprint2.js"></script>
+    
+</body>
+</html>
