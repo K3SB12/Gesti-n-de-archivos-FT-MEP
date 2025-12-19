@@ -25,6 +25,19 @@ async function inicializarSistema() {
     console.log('✅ Sistema listo para evaluación');
 }
 
+function configurarNavegacion() {
+    // Configurar los listeners correctos en el header
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const texto = this.textContent.trim();
+            if (texto.includes('I Ciclo')) cargarSelectorEvaluacion('I');
+            if (texto.includes('II Ciclo')) cargarSelectorEvaluacion('II');
+            if (texto.includes('III Ciclo')) cargarSelectorEvaluacion('III');
+        });
+    });
+}
+
 async function cargarDatosIniciales() {
     try {
         const response = await fetch('data/estudiantes.json');
@@ -42,16 +55,22 @@ async function cargarDatosIniciales() {
         }));
         
         console.log(`✅ ${sistemaFT.estudiantes.length} estudiantes cargados`);
+        console.log('Estudiantes:', sistemaFT.estudiantes);
         actualizarContadorEstudiantes();
         
     } catch (error) {
         console.error('Error cargando estudiantes:', error);
-        // Datos de emergencia
+        // Datos de emergencia - MÁS COMPLETOS Y CON DIVERSIDAD DE CICLOS
         sistemaFT.estudiantes = [
             {id: "1", nombre: "Aaron Gonzales Mera", cedula: "3068800365", grupo: "4-A", ciclo: "II"},
             {id: "2", nombre: "María Rodríguez Pérez", cedula: "2087601234", grupo: "4-A", ciclo: "II"},
-            {id: "3", nombre: "Carlos López García", cedula: "3094506789", grupo: "5-B", ciclo: "III"}
+            {id: "3", nombre: "Carlos López García", cedula: "3094506789", grupo: "5-B", ciclo: "II"},
+            {id: "4", nombre: "Ana Martínez Castro", cedula: "3101209876", grupo: "2-A", ciclo: "I"},
+            {id: "5", nombre: "Pedro Solís Vargas", cedula: "2113405678", grupo: "8-C", ciclo: "III"},
+            {id: "6", nombre: "Sofía Rojas Jiménez", cedula: "3126704321", grupo: "4-A", ciclo: "II"},
+            {id: "7", nombre: "Diego Hernández Mora", cedula: "2138906543", grupo: "7-B", ciclo: "III"}
         ];
+        console.log('Usando datos de emergencia:', sistemaFT.estudiantes);
         actualizarContadorEstudiantes();
     }
 }
@@ -100,11 +119,14 @@ async function cargarModuloEvaluacion(areaKey, ciclo, grado) {
     // 6. ESPERAR a que el navegador procese el HTML antes de generar la tabla
     // Esto soluciona el error "Generando tabla de evaluación..."
     setTimeout(() => {
-        generarTablaEvaluacion(indicadores, grado);
+        generarTablaEvaluacion(indicadores, grado, ciclo);
         // Configurar el valor del selector de período
         const selectPeriodo = document.getElementById('selectPeriodo');
         if (selectPeriodo) {
             selectPeriodo.value = sistemaFT.periodoActual;
+            selectPeriodo.addEventListener('change', function() {
+                cambiarPeriodoEvaluacion(this.value);
+            });
         }
     }, 50);
     
@@ -140,7 +162,14 @@ function obtenerIndicadoresParaGrado(moduloData, grado) {
     const contenidos = moduloData.contenidos;
     const gradoKey = grado.toString();
     
-    if (!contenidos[gradoKey]) return [];
+    if (!contenidos[gradoKey]) {
+        console.log(`No hay contenidos para grado ${gradoKey} en`, moduloData.nombre);
+        // Intentar con grados cercanos
+        if (parseInt(grado) <= 3 && contenidos["1"]) return obtenerIndicadoresParaGrado(moduloData, "1");
+        if (parseInt(grado) >= 4 && parseInt(grado) <= 6 && contenidos["4"]) return obtenerIndicadoresParaGrado(moduloData, "4");
+        if (parseInt(grado) >= 7 && contenidos["7"]) return obtenerIndicadoresParaGrado(moduloData, "7");
+        return [];
+    }
     
     let todosIndicadores = [];
     
@@ -156,6 +185,7 @@ function obtenerIndicadoresParaGrado(moduloData, grado) {
         });
     });
     
+    console.log(`Encontrados ${todosIndicadores.length} indicadores para grado ${grado}`);
     return todosIndicadores;
 }
 
@@ -186,7 +216,7 @@ function generarHTMLVistaEvaluacion(moduloData, ciclo, grado, rdaCiclo, porcenta
                 </div>
                 <div class="periodo-selector">
                     <label for="selectPeriodo"><i class="fas fa-calendar-alt"></i> Período:</label>
-                    <select id="selectPeriodo" onchange="cambiarPeriodoEvaluacion(this.value)">
+                    <select id="selectPeriodo">
                         <option value="semana-1">Semana 1</option>
                         <option value="semana-2">Semana 2</option>
                         <option value="semana-3">Semana 3</option>
@@ -243,9 +273,32 @@ function generarHTMLVistaEvaluacion(moduloData, ciclo, grado, rdaCiclo, porcenta
 // 4. GENERAR TABLA INTERACTIVA DE EVALUACIÓN (CORAZÓN DEL SPRINT 1)
 // ============================================
 
-function generarTablaEvaluacion(indicadores, grado) {
+function generarTablaEvaluacion(indicadores, grado, ciclo) {
     const container = document.getElementById('tablaEvaluacionContainer');
-    if (!container || sistemaFT.estudiantes.length === 0) return;
+    if (!container) {
+        console.error('No se encontró el container para la tabla');
+        return;
+    }
+    
+    if (sistemaFT.estudiantes.length === 0) {
+        container.innerHTML = '<div class="error">❌ No hay estudiantes cargados en el sistema.</div>';
+        return;
+    }
+    
+    // Filtrar estudiantes del ciclo correcto
+    const estudiantesFiltrados = sistemaFT.estudiantes.filter(est => {
+        const estCiclo = determinarCiclo(est.grupo);
+        const estGrado = est.grupo.split('-')[0];
+        return estCiclo === ciclo && estGrado === grado.toString();
+    });
+    
+    if (estudiantesFiltrados.length === 0) {
+        console.warn(`No hay estudiantes de ${grado}° en Ciclo ${ciclo}. Mostrando todos...`);
+        container.innerHTML = '<div class="info">ℹ️ No hay estudiantes en este grado específico. Mostrando todos los estudiantes del ciclo.</div>';
+        estudiantesFiltrados.push(...sistemaFT.estudiantes.filter(est => determinarCiclo(est.grupo) === ciclo));
+    }
+    
+    console.log(`Generando tabla para ${estudiantesFiltrados.length} estudiantes`);
     
     // Crear estructura de la tabla
     let html = `
@@ -274,7 +327,7 @@ function generarTablaEvaluacion(indicadores, grado) {
     // Columnas de resultados
     html += `
                         <th class="col-promedio sticky">Promedio TC</th>
-                        <th class="col-porcentaje sticky">${calcularPorcentajeTrabajoCotidiano(sistemaFT.nivelActual)}% TC</th>
+                        <th class="col-porcentaje sticky">${calcularPorcentajeTrabajoCotidiano(ciclo)}% TC</th>
                         <th class="col-nivel sticky">Nivel</th>
                     </tr>
                 </thead>
@@ -282,40 +335,38 @@ function generarTablaEvaluacion(indicadores, grado) {
     `;
     
     // Filas de estudiantes
-    sistemaFT.estudiantes
-        .filter(est => determinarCiclo(est.grupo) === sistemaFT.nivelActual || est.grupo.startsWith(grado))
-        .forEach(estudiante => {
-            html += `<tr data-estudiante-id="${estudiante.id}">`;
-            html += `<td class="col-estudiante sticky">
-                        <div class="estudiante-info">
-                            <strong>${estudiante.nombre}</strong>
-                            <small>${estudiante.cedula} | ${estudiante.grupo}</small>
-                        </div>
-                    </td>`;
-            
-            // Celdas de calificación por indicador
-            indicadores.forEach(ind => {
-                const calificacion = obtenerCalificacion(estudiante.id, ind.key);
-                const nivelClass = calificacion ? `nivel-${calificacion}` : '';
-                html += `
-                    <td class="celda-calificacion ${nivelClass}" 
-                        data-estudiante="${estudiante.id}" 
-                        data-indicador="${ind.key}"
-                        onclick="abrirSelectorCalificacion(this, '${estudiante.id}', '${ind.key}')">
-                        ${calificacion ? `<span class="valor-calificacion">${calificacion}</span>` : '–'}
-                    </td>
-                `;
-            });
-            
-            // Celdas de resultados (se calcularán después)
+    estudiantesFiltrados.forEach(estudiante => {
+        html += `<tr data-estudiante-id="${estudiante.id}">`;
+        html += `<td class="col-estudiante sticky">
+                    <div class="estudiante-info">
+                        <strong>${estudiante.nombre}</strong>
+                        <small>${estudiante.cedula} | ${estudiante.grupo}</small>
+                    </div>
+                </td>`;
+        
+        // Celdas de calificación por indicador
+        indicadores.forEach(ind => {
+            const calificacion = obtenerCalificacion(estudiante.id, ind.key);
+            const nivelClass = calificacion ? `nivel-${calificacion}` : '';
             html += `
-                <td class="col-promedio sticky" id="promedio-${estudiante.id}">0.0</td>
-                <td class="col-porcentaje sticky" id="porcentaje-${estudiante.id}">0.0</td>
-                <td class="col-nivel sticky" id="nivel-${estudiante.id}">–</td>
+                <td class="celda-calificacion ${nivelClass}" 
+                    data-estudiante="${estudiante.id}" 
+                    data-indicador="${ind.key}"
+                    onclick="abrirSelectorCalificacion(this, '${estudiante.id}', '${ind.key}')">
+                    ${calificacion ? `<span class="valor-calificacion">${calificacion}</span>` : '–'}
+                </td>
             `;
-            
-            html += `</tr>`;
         });
+        
+        // Celdas de resultados (se calcularán después)
+        html += `
+            <td class="col-promedio sticky" id="promedio-${estudiante.id}">0.0</td>
+            <td class="col-porcentaje sticky" id="porcentaje-${estudiante.id}">0.0</td>
+            <td class="col-nivel sticky" id="nivel-${estudiante.id}">–</td>
+        `;
+        
+        html += `</tr>`;
+    });
     
     html += `</tbody></table></div>`;
     
@@ -325,6 +376,8 @@ function generarTablaEvaluacion(indicadores, grado) {
     inicializarTooltipsIndicadores(indicadores);
     calcularYMostrarPromedios();
     configurarEventosTabla();
+    
+    console.log('✅ Tabla generada exitosamente');
 }
 
 // ============================================
@@ -360,6 +413,8 @@ function guardarCalificacion(estudianteId, indicadorKey, nivel) {
     // Actualizar interfaz
     actualizarCeldaCalificacion(estudianteId, indicadorKey, nivel);
     calcularYMostrarPromedios();
+    
+    console.log(`Calificación guardada: ${estudianteId} - ${indicadorKey} = ${nivel}`);
 }
 
 function abrirSelectorCalificacion(celda, estudianteId, indicadorKey) {
@@ -385,11 +440,23 @@ function abrirSelectorCalificacion(celda, estudianteId, indicadorKey) {
     
     // Posicionar selector
     const rect = celda.getBoundingClientRect();
-    selector.style.position = 'absolute';
-    selector.style.top = `${rect.bottom + window.scrollY}px`;
-    selector.style.left = `${rect.left + window.scrollX}px`;
+    selector.style.position = 'fixed';
+    selector.style.top = `${rect.bottom + 5}px`;
+    selector.style.left = `${rect.left}px`;
+    selector.style.zIndex = '1000';
     
     document.body.appendChild(selector);
+    
+    // Cerrar selector al hacer clic fuera
+    setTimeout(() => {
+        const closeOnClickOutside = (e) => {
+            if (!selector.contains(e.target) && e.target !== celda) {
+                selector.remove();
+                document.removeEventListener('click', closeOnClickOutside);
+            }
+        };
+        document.addEventListener('click', closeOnClickOutside);
+    }, 10);
 }
 
 function seleccionarNivel(estudianteId, indicadorKey, nivel) {
@@ -437,9 +504,13 @@ function calcularYMostrarPromedios() {
         const nivelFinal = obtenerNivelAproximado(promedio);
         
         // Actualizar celdas de resultados
-        document.getElementById(`promedio-${estudianteId}`).textContent = promedio;
-        document.getElementById(`porcentaje-${estudianteId}`).textContent = aporteTC;
-        document.getElementById(`nivel-${estudianteId}`).innerHTML = `<span class="badge-nivel ${nivelFinal}">${nivelFinal.toUpperCase()}</span>`;
+        const promedioCell = document.getElementById(`promedio-${estudianteId}`);
+        const porcentajeCell = document.getElementById(`porcentaje-${estudianteId}`);
+        const nivelCell = document.getElementById(`nivel-${estudianteId}`);
+        
+        if (promedioCell) promedioCell.textContent = promedio;
+        if (porcentajeCell) porcentajeCell.textContent = aporteTC;
+        if (nivelCell) nivelCell.innerHTML = `<span class="badge-nivel ${nivelFinal}">${nivelFinal.toUpperCase()}</span>`;
     });
     
     // Actualizar resumen
@@ -447,8 +518,9 @@ function calcularYMostrarPromedios() {
 }
 
 function obtenerNivelAproximado(promedio) {
-    if (promedio >= 2.5) return 'alto';
-    if (promedio >= 1.5) return 'medio';
+    const num = parseFloat(promedio);
+    if (num >= 2.5) return 'alto';
+    if (num >= 1.5) return 'medio';
     return 'bajo';
 }
 
@@ -469,11 +541,13 @@ function actualizarResumenPromedios() {
     const porcentajeTC = calcularPorcentajeTrabajoCotidiano(sistemaFT.nivelActual);
     const aporteGeneral = (promedioGeneral * porcentajeTC / 3).toFixed(1);
     
+    const estudiantesCalificados = document.querySelectorAll('.celda-calificacion:has(.valor-calificacion)').length > 0;
+    
     container.innerHTML = `
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-users"></i></div>
             <div class="stat-content">
-                <h3>${promedios.length}/${sistemaFT.estudiantes.length}</h3>
+                <h3>${promedios.length}/${document.querySelectorAll('[data-estudiante-id]').length}</h3>
                 <p>Estudiantes calificados</p>
             </div>
         </div>
@@ -737,6 +811,13 @@ function cargarSelectorEvaluacion(ciclo) {
     `;
 }
 
+// CORRECCIÓN: Función para compatibilidad con el HTML
+function cargarNivel(nivel) {
+    if (nivel.includes('I')) cargarSelectorEvaluacion('I');
+    if (nivel.includes('II')) cargarSelectorEvaluacion('II');
+    if (nivel.includes('III')) cargarSelectorEvaluacion('III');
+}
+
 function actualizarContadorEstudiantes() {
     const contador = document.getElementById('contadorEstudiantes');
     if (contador) contador.textContent = sistemaFT.estudiantes.length;
@@ -756,6 +837,28 @@ function actualizarContadorCalificaciones() {
     contador.textContent = total;
 }
 
+function actualizarNavegacionActiva(seccion) {
+    // Implementar si es necesario
+}
+
+function actualizarBreadcrumb(texto) {
+    const breadcrumb = document.getElementById('breadcrumb');
+    if (breadcrumb) {
+        breadcrumb.innerHTML = `
+            <span class="breadcrumb-item" onclick="mostrarDashboard()">
+                <i class="fas fa-home"></i> Inicio
+            </span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item active">${texto}</span>
+        `;
+    }
+}
+
+function irAEvaluacionRapida() {
+    // Ir directamente a evaluar II Ciclo, 4° grado, Apropiación tecnológica
+    cargarModuloEvaluacion('apropiacion', 'II', '4');
+}
+
 // ============================================
 // 9. INICIALIZACIÓN Y EXPORTACIÓN
 // ============================================
@@ -764,11 +867,14 @@ function actualizarContadorCalificaciones() {
 window.mostrarDashboard = mostrarDashboard;
 window.cargarModuloEvaluacion = cargarModuloEvaluacion;
 window.cargarSelectorEvaluacion = cargarSelectorEvaluacion;
+window.cargarNivel = cargarNivel; // CORRECCIÓN: Agregada
 window.volverDashboard = mostrarDashboard;
 window.seleccionarNivel = seleccionarNivel;
 window.guardarCalificaciones = guardarCalificaciones;
 window.exportarCalificaciones = exportarCalificaciones;
 window.cambiarPeriodoEvaluacion = cambiarPeriodoEvaluacion;
+window.abrirSelectorCalificacion = abrirSelectorCalificacion;
+window.irAEvaluacionRapida = irAEvaluacionRapida; // Agregada
 
 // Inicializar sistema
 if (document.readyState === 'loading') {
@@ -777,5 +883,4 @@ if (document.readyState === 'loading') {
     inicializarSistema();
 }
 
-console.log('✅ Sistema FT-MEP - Sprint 1 cargado');
-
+console.log('✅ Sistema FT-MEP - Sprint 1 cargado (Versión corregida)');
