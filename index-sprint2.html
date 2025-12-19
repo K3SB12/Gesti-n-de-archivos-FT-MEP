@@ -3,20 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema FT-MEP Sprint 2 - Evaluación Integral</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="style-sprint2.css">
+    <title>FT-MEP Sprint 2 Corregido - Evaluación Integral</title>
+    <link rel="stylesheet" href="style-sprint2-corregido.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="assets/icons/ft-favicon.ico">
+    
+    <style>
+        /* Estilos de carga inicial */
+        .carga-inicial {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+        
+        .carga-logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .carga-texto {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        
+        .carga-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .carga-progreso {
+            height: 100%;
+            background: #2ecc71;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Pantalla de carga -->
+    <div id="pantallaCarga" class="carga-inicial">
+        <div class="carga-logo">
+            <i class="fas fa-laptop-code"></i>
+        </div>
+        <div class="carga-texto">
+            Inicializando Sistema FT-MEP Sprint 2...
+        </div>
+        <div class="carga-bar">
+            <div class="carga-progreso" id="progresoCarga"></div>
+        </div>
+    </div>
 
     <!-- Header del Sistema -->
     <header class="header-sistema">
         <div class="container">
             <div class="logo-header">
-                <h1><i class="fas fa-laptop-code"></i> Sistema FT-MEP <span class="version-badge">Sprint 2</span></h1>
+                <h1><i class="fas fa-laptop-code"></i> FT-MEP <span class="version-badge">Sprint 2 Corregido</span></h1>
                 <p class="subtitulo-header">Evaluación Integral - MEP Costa Rica</p>
             </div>
             
@@ -37,6 +98,9 @@
                 <div class="nav-actions">
                     <button class="btn btn-sm btn-primary" onclick="calcularNotaFinal()">
                         <i class="fas fa-calculator"></i> Nota Final
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="abrirCalculadoraMEP()">
+                        <i class="fas fa-calculator"></i> Calculadora
                     </button>
                 </div>
             </nav>
@@ -67,20 +131,20 @@
             <div class="footer-content">
                 <div class="footer-logo">
                     <h3><i class="fas fa-laptop-code"></i> FT-MEP</h3>
-                    <p>Sistema de Evaluación Integral<br>Formación Tecnológica - Sprint 2</p>
+                    <p>Sistema de Evaluación Integral<br>Formación Tecnológica - Sprint 2 Corregido</p>
                 </div>
                 <div class="footer-info">
-                    <p><i class="fas fa-info-circle"></i> Sistema v2.0 - REA MEP AC-CSE-259-28-2023</p>
+                    <p><i class="fas fa-info-circle"></i> Sistema v2.1 - REA MEP AC-CSE-259-28-2023</p>
                     <p><i class="fas fa-calendar"></i> 2024 - Todos los derechos reservados</p>
                 </div>
                 <div class="footer-stats">
                     <div class="stat-mini">
                         <i class="fas fa-check-circle"></i>
-                        <span>Trabajo Cotidiano: Implementado</span>
+                        <span id="estadoTC">Trabajo Cotidiano: Funcional</span>
                     </div>
                     <div class="stat-mini">
                         <i class="fas fa-check-circle"></i>
-                        <span>Componentes Sumativos: Completos</span>
+                        <span id="estadoTareas">Tareas: Operativo</span>
                     </div>
                 </div>
             </div>
@@ -90,8 +154,37 @@
     <!-- Scripts del Sistema -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Script Principal Sprint 2 -->
-    <script src="app-sprint2.js"></script>
+    <!-- Módulos funcionales -->
+    <script src="js/modulo-tareas-funcional.js"></script>
+    <script src="js/modulo-proyecto-funcional.js"></script>
     
+    <!-- Script Principal Sprint 2 Corregido -->
+    <script src="app-sprint2-corregido.js"></script>
+    
+    <!-- Inicialización -->
+    <script>
+        // Ocultar pantalla de carga cuando todo esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                document.getElementById('progresoCarga').style.width = '100%';
+                setTimeout(() => {
+                    document.getElementById('pantallaCarga').style.display = 'none';
+                    // Inicializar sistema
+                    if (typeof inicializarSistemaSprint2 === 'function') {
+                        inicializarSistemaSprint2();
+                    }
+                }, 500);
+            }, 1000);
+        });
+        
+        // Función para abrir calculadora MEP (si existe)
+        function abrirCalculadoraMEP() {
+            if (typeof window.calculadoraMEP !== 'undefined') {
+                window.calculadoraMEP.abrir();
+            } else {
+                alert('Calculadora MEP no disponible en este momento.');
+            }
+        }
+    </script>
 </body>
 </html>
