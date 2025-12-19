@@ -69,13 +69,26 @@ async function cargarDatosIniciales() {
         
     } catch (error) {
         console.error('Error cargando estudiantes:', error);
+        // DATOS DE EMERGENCIA MEJORADOS - CON ESTUDIANTES PARA LOS 3 CICLOS
         sistemaFT.estudiantes = [
+            // I CICLO (1°-3°)
+            {id: "est-101", nombre: "Sofía Rojas Alfaro", cedula: "701230456", grupo: "1-A", ciclo: "I", email: "sofia@ejemplo.edu.cr"},
+            {id: "est-102", nombre: "Diego Vargas Mora", cedula: "702340567", grupo: "2-B", ciclo: "I", email: "diego@ejemplo.edu.cr"},
+            {id: "est-103", nombre: "Valeria Castro Solís", cedula: "703450678", grupo: "3-A", ciclo: "I", email: "valeria@ejemplo.edu.cr"},
+            
+            // II CICLO (4°-6°) - TU GRUPO PRINCIPAL
             {id: "1", nombre: "Aaron Gonzales Mera", cedula: "3068800365", grupo: "4-A", ciclo: "II", email: "aaron@ejemplo.edu.cr"},
             {id: "2", nombre: "María Rodríguez Pérez", cedula: "2087601234", grupo: "4-A", ciclo: "II", email: "maria@ejemplo.edu.cr"},
-            {id: "3", nombre: "Carlos López García", cedula: "3094506789", grupo: "7-B", ciclo: "III", email: "carlos@ejemplo.edu.cr"},
-            {id: "4", nombre: "Ana Martínez Castro", cedula: "3101209876", grupo: "2-A", ciclo: "I", email: "ana@ejemplo.edu.cr"},
-            {id: "5", nombre: "Pedro Solís Vargas", cedula: "2113405678", grupo: "8-C", ciclo: "III", email: "pedro@ejemplo.edu.cr"}
+            {id: "est-201", nombre: "Carlos López García", cedula: "3094506789", grupo: "5-B", ciclo: "II", email: "carlos@ejemplo.edu.cr"},
+            {id: "est-202", nombre: "Ana Fernández Jiménez", cedula: "4105607890", grupo: "6-C", ciclo: "II", email: "ana@ejemplo.edu.cr"},
+            
+            // III CICLO (7°-9°)
+            {id: "est-301", nombre: "Pedro Solís Vargas", cedula: "5116708901", grupo: "7-A", ciclo: "III", email: "pedro@ejemplo.edu.cr"},
+            {id: "est-302", nombre: "Camila Navarro Ríos", cedula: "6127809012", grupo: "8-B", ciclo: "III", email: "camila@ejemplo.edu.cr"},
+            {id: "est-303", nombre: "Javier Méndez Castro", cedula: "7138900123", grupo: "9-C", ciclo: "III", email: "javier@ejemplo.edu.cr"},
+            {id: "est-304", nombre: "Gabriela Soto Chaves", cedula: "8149001234", grupo: "7-B", ciclo: "III", email: "gabriela@ejemplo.edu.cr"}
         ];
+        console.log('Usando datos de emergencia mejorados:', sistemaFT.estudiantes);
     }
 }
 
@@ -910,37 +923,35 @@ function generarTablaAsistencia() {
         estudiantesPorGrupo[grupo].forEach(estudiante => {
             totalEstudiantes++;
             
-            // Obtener asistencia existente o generar aleatoria para demo
+            // Obtener asistencia existente para esta fecha específica
             let asistio = true;
             let justificacion = '';
-            let porcentajeAsistencia = 100;
-            let aporteAsistencia = 10; // Máximo 10 puntos
             
-            if (sistemaFT.asistencias[periodo] && sistemaFT.asistencias[periodo][estudiante.id]) {
-                const asistenciaEst = sistemaFT.asistencias[periodo][estudiante.id];
-                asistio = asistenciaEst.asistio !== false;
-                justificacion = asistenciaEst.justificacion || '';
-                porcentajeAsistencia = asistenciaEst.porcentaje || 100;
-                aporteAsistencia = (porcentajeAsistencia * 10 / 100);
-            } else {
-                // Datos de demostración
-                const rand = Math.random();
-                if (rand < 0.15) { // 15% de ausencia
-                    asistio = false;
+            if (sistemaFT.asistencias[periodo] && 
+                sistemaFT.asistencias[periodo][estudiante.id] &&
+                sistemaFT.asistencias[periodo][estudiante.id][fecha]) {
+                
+                const asistenciaDia = sistemaFT.asistencias[periodo][estudiante.id][fecha];
+                asistio = asistenciaDia.asistio !== false;
+                justificacion = asistenciaDia.justificacion || '';
+                
+                if (!asistio) {
                     totalAusencias++;
-                    if (rand < 0.05) { // 5% justificadas
-                        justificacion = 'Enfermedad';
-                        totalJustificadas++;
-                    }
-                    porcentajeAsistencia = 85;
-                    aporteAsistencia = 8.5;
+                    if (justificacion) totalJustificadas++;
                 } else {
                     totalAsistencias++;
                 }
+            } else {
+                // Si no hay registro, considerar presente por defecto
+                totalAsistencias++;
             }
             
+            // Calcular porcentaje de asistencia histórico
+            let porcentajeAsistencia = calcularPorcentajeAsistenciaHistorico(estudiante.id);
+            let aporteAsistencia = (porcentajeAsistencia * 10 / 100).toFixed(1);
+            
             html += `
-                <tr data-estudiante="${estudiante.id}" data-grupo="${grupo}">
+                <tr data-estudiante="${estudiante.id}" data-grupo="${grupo}" data-fecha="${fecha}">
                     <td class="col-estudiante">
                         <div class="estudiante-info">
                             <strong>${estudiante.nombre}</strong>
@@ -951,24 +962,32 @@ function generarTablaAsistencia() {
                     <td class="col-asistencia">
                         <div class="asistencia-toggle">
                             <button class="btn-toggle ${asistio ? 'active' : ''}" 
-                                    onclick="cambiarAsistencia('${estudiante.id}', ${!asistio})">
+                                    onclick="cambiarAsistencia('${estudiante.id}', '${fecha}', ${!asistio})">
                                 <i class="fas fa-${asistio ? 'check' : 'times'}"></i>
                                 ${asistio ? 'Presente' : 'Ausente'}
                             </button>
                         </div>
                     </td>
                     <td class="col-justificacion">
-                        <input type="text" 
-                               value="${justificacion}"
-                               placeholder="Motivo ausencia..."
-                               onchange="actualizarJustificacion('${estudiante.id}', this.value)">
+                        <div class="justificacion-container">
+                            <input type="text" 
+                                   class="justificacion-input"
+                                   value="${justificacion}"
+                                   placeholder="${asistio ? 'No aplica' : 'Motivo ausencia...'}"
+                                   onchange="actualizarJustificacion('${estudiante.id}', '${fecha}', this.value)"
+                                   ${asistio ? 'disabled' : ''}>
+                            <button class="btn-justificacion" onclick="mostrarOpcionesJustificacion('${estudiante.id}', '${fecha}')" ${asistio ? 'disabled' : ''}>
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
                     </td>
                     <td class="col-porcentaje">
-                        <span class="porcentaje-badge ${porcentajeAsistencia >= 90 ? 'alto' : porcentajeAsistencia >= 70 ? 'medio' : 'bajo'}">
+                        <span class="porcentaje-badge ${porcentajeAsistencia >= 90 ? 'alto' : porcentajeAsistencia >= 70 ? 'medio' : 'bajo'}" 
+                              title="Asistencia histórica en el período">
                             ${porcentajeAsistencia}%
                         </span>
                     </td>
-                    <td class="col-aporte">${aporteAsistencia.toFixed(1)}</td>
+                    <td class="col-aporte">${aporteAsistencia}</td>
                 </tr>
             `;
         });
@@ -990,38 +1009,160 @@ function generarTablaAsistencia() {
     if (grupoStats) {
         let gruposHTML = '';
         Object.keys(estudiantesPorGrupo).forEach(grupo => {
-            const estudiantesGrupo = estudiantesPorGrupo[grupo].length;
+            const estudiantesGrupo = estudiantesPorGrupo[grupo];
+            const asistenciasGrupo = estudiantesGrupo.filter(est => {
+                if (sistemaFT.asistencias[periodo] && 
+                    sistemaFT.asistencias[periodo][est.id] &&
+                    sistemaFT.asistencias[periodo][est.id][fecha]) {
+                    return sistemaFT.asistencias[periodo][est.id][fecha].asistio !== false;
+                }
+                return true; // Por defecto presente
+            }).length;
+            
+            const porcentajeGrupo = estudiantesGrupo.length > 0 ? 
+                Math.round((asistenciasGrupo / estudiantesGrupo.length) * 100) : 0;
+            
             gruposHTML += `
                 <div class="grupo-stat-item">
                     <span class="grupo-name">${grupo}</span>
-                    <span class="grupo-value">${estudiantesGrupo} estudiantes</span>
+                    <div class="grupo-details">
+                        <span class="grupo-asistencia">${asistenciasGrupo}/${estudiantesGrupo.length}</span>
+                        <span class="grupo-porcentaje ${porcentajeGrupo >= 90 ? 'alto' : porcentajeGrupo >= 70 ? 'medio' : 'bajo'}">
+                            ${porcentajeGrupo}%
+                        </span>
+                    </div>
                 </div>
             `;
         });
         grupoStats.innerHTML = gruposHTML;
     }
+    
+    // Actualizar fecha en el título
+    const fechaObj = new Date(fecha);
+    const fechaFormateada = fechaObj.toLocaleDateString('es-CR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    document.querySelector('.modulo-subtitulo').innerHTML = 
+        `10% de la nota final - <strong>${fechaFormateada}</strong>`;
 }
 
-function cambiarAsistencia(estudianteId, asistio) {
+// Nueva función para calcular porcentaje histórico
+function calcularPorcentajeAsistenciaHistorico(estudianteId) {
     const periodo = sistemaFT.periodoActual;
-    const fecha = document.getElementById('fechaAsistencia')?.value || new Date().toISOString().split('T')[0];
+    if (!sistemaFT.asistencias[periodo] || !sistemaFT.asistencias[periodo][estudianteId]) {
+        return 100; // Si no hay registros, 100% por defecto
+    }
+    
+    const registros = sistemaFT.asistencias[periodo][estudianteId];
+    const dias = Object.keys(registros);
+    
+    if (dias.length === 0) return 100;
+    
+    const presentes = dias.filter(dia => registros[dia].asistio !== false).length;
+    return Math.round((presentes / dias.length) * 100);
+}
+
+// Función mejorada para cambiar asistencia
+function cambiarAsistencia(estudianteId, fecha, asistio) {
+    const periodo = sistemaFT.periodoActual;
     
     if (!sistemaFT.asistencias[periodo]) sistemaFT.asistencias[periodo] = {};
     if (!sistemaFT.asistencias[periodo][estudianteId]) sistemaFT.asistencias[periodo][estudianteId] = {};
     
-    sistemaFT.asistencias[periodo][estudianteId] = {
-        ...sistemaFT.asistencias[periodo][estudianteId],
-        [fecha]: {
-            asistio: asistio,
-            fecha: fecha,
-            hora: new Date().toLocaleTimeString()
-        }
+    sistemaFT.asistencias[periodo][estudianteId][fecha] = {
+        asistio: asistio,
+        fecha: fecha,
+        horaRegistro: new Date().toLocaleTimeString('es-CR'),
+        justificacion: asistio ? '' : (sistemaFT.asistencias[periodo][estudianteId][fecha]?.justificacion || '')
     };
     
     localStorage.setItem('ft_asistencias', JSON.stringify(sistemaFT.asistencias));
     
-    mostrarNotificacion(`✅ Asistencia ${asistio ? 'registrada' : 'actualizada'}`, 'success');
+    mostrarNotificacion(
+        `✅ ${asistio ? 'Asistencia registrada' : 'Ausencia registrada'} para ${obtenerNombreEstudiante(estudianteId)}`,
+        asistio ? 'success' : 'warning'
+    );
+    
+    // Regenerar tabla
     setTimeout(() => generarTablaAsistencia(), 100);
+}
+
+// Función para actualizar justificación
+function actualizarJustificacion(estudianteId, fecha, justificacion) {
+    const periodo = sistemaFT.periodoActual;
+    
+    if (sistemaFT.asistencias[periodo] && 
+        sistemaFT.asistencias[periodo][estudianteId] &&
+        sistemaFT.asistencias[periodo][estudianteId][fecha]) {
+        
+        sistemaFT.asistencias[periodo][estudianteId][fecha].justificacion = justificacion;
+        localStorage.setItem('ft_asistencias', JSON.stringify(sistemaFT.asistencias));
+        
+        if (justificacion.trim()) {
+            mostrarNotificacion('✅ Justificación guardada', 'success');
+        }
+    }
+}
+
+// Función para mostrar opciones de justificación común
+function mostrarOpcionesJustificacion(estudianteId, fecha) {
+    const opciones = [
+        'Enfermedad',
+        'Cita médica',
+        'Problemas familiares',
+        'Transporte',
+        'Otras actividades escolares',
+        'Permiso especial'
+    ];
+    
+    const selector = document.createElement('div');
+    selector.className = 'selector-justificacion';
+    selector.innerHTML = `
+        <div class="selector-header">
+            <span>Seleccionar justificación común</span>
+            <button class="btn-cerrar" onclick="this.parentElement.parentElement.remove()">&times;</button>
+        </div>
+        <div class="opciones-justificacion">
+            ${opciones.map(op => `
+                <button class="opcion" onclick="seleccionarJustificacion('${estudianteId}', '${fecha}', '${op}')">
+                    ${op}
+                </button>
+            `).join('')}
+        </div>
+    `;
+    
+    // Posicionar cerca del campo de justificación
+    const input = document.querySelector(`[data-estudiante="${estudianteId}"][data-fecha="${fecha}"] .justificacion-input`);
+    if (input) {
+        const rect = input.getBoundingClientRect();
+        selector.style.position = 'fixed';
+        selector.style.top = `${rect.bottom + 5}px`;
+        selector.style.left = `${rect.left}px`;
+        selector.style.zIndex = '1000';
+    }
+    
+    document.body.appendChild(selector);
+}
+
+function seleccionarJustificacion(estudianteId, fecha, justificacion) {
+    const input = document.querySelector(`[data-estudiante="${estudianteId}"][data-fecha="${fecha}"] .justificacion-input`);
+    if (input) {
+        input.value = justificacion;
+        input.dispatchEvent(new Event('change'));
+    }
+    
+    const selector = document.querySelector('.selector-justificacion');
+    if (selector) selector.remove();
+}
+
+// Función auxiliar para obtener nombre
+function obtenerNombreEstudiante(estudianteId) {
+    const estudiante = sistemaFT.estudiantes.find(e => e.id === estudianteId);
+    return estudiante ? estudiante.nombre : 'Estudiante';
 }
 
 // ============================================
